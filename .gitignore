@@ -1,0 +1,10 @@
+addsubmodules.sh
+*.log
+*.bak
+tmp
+hosts/hosts
+hosts/whitelist
+hosts/hosts.original
+vim/.netrwhist
+vim/undo/**
+!vim/undo/.gitkeep
