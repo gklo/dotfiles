@@ -1,0 +1,79 @@
+!Xft.antialias: 0
+!Xft.dpi: 96
+!Xft.hinting: 0
+!Xft.hintstyle: hintnone
+!Xft.lcdfilter: lcddefault
+!Xft.rgba: rgb
+
+Xcursor.theme:    Vanilla-DMZ-AA
+
+!urxvt color scheme:
+URxvt.depth: 32
+URxvt.background: [50]#151515
+URxvt.foreground: #DEDEDE
+
+! Molokai MOD
+!black
+URxvt.color0 : #222222
+URxvt.color8 : #454545
+!red
+URxvt.color1 : #F92672
+URxvt.color9 : #F92672
+!green
+URxvt.color2 : #A6E22E
+URxvt.color10: #A6E22E
+!yellow
+URxvt.color3 : #FD971F
+URxvt.color11: #FD971F
+!blue
+URxvt.color4 : #4682B4
+URxvt.color12: #4682B4
+!magenta
+URxvt.color5 : #AE81FF
+URxvt.color13: #AE81FF
+!cyan
+URxvt.color6: #89b6e2
+URxvt.color14: #46a4ff
+!white
+URxvt.color7 : #FFFFFF
+URxvt.color15: #FFFFFF
+
+URxvt.colorIT: #87af5f
+URxvt.colorBD: #d7d7d7
+URxvt.colorUL: #87afd7
+
+!URxvt.font: -xos4-terminus-medium-r-normal--14-140-72-72-c-80-iso10646-1
+!URxvt.italicFont: -xos4-terminus-medium-r-normal--14-140-72-72-c-80-iso10646-1
+!URxvt.boldFont: -xos4-terminus-medium-r-normal--14-140-72-72-c-80-iso10646-1
+!URxvt.lineSpace: 1
+URxvt.font: xft:terminess powerline:size=12:antialias=False:hinting:False
+!        xft:WenQuanYi Bitmap Song:size=10:antialias=False:hinting:False
+!URxvt.lineSpace: 4
+URxvt.boldFont: xft:terminess powerline:size=12:antialias=False:hinting:False
+URxvt.italicFont: xft:terminess powerline:size=12:antialias=False:hinting:False
+!        xft:WenQuanYi Bitmap Song:size=10:antialias=False:hinting:False
+!URxvt.letterSpace: -1
+
+!urxvt extensions, remove select to clipboard:
+URxvt.perl-ext-common:  default,matcher,clipboard,resize-font,-selection-to-clipboard
+
+!enabling clickable links:
+!URxvt.url-launcher:      /usr/bin/firefox
+URxvt.url-launcher:      /usr/bin/google-chrome
+URxvt.matcher.button:   1
+
+!urxvt scrolling options and cursor style:
+URxvt.saveLines: 12000
+URxvt.scrollBar: false
+!URxvt.cursorBlink: true
+!URxvt.cursorUnderline: 
+
+URxvt.iso14755: false
+URxvt.iso14755_52: false
+
+URxvt.keysym.Control-Shift-C:   perl:clipboard:copy
+URxvt.keysym.Control-Shift-V:   perl:clipboard:paste
+URxvt.keysym.M-C-v: perl:clipboard:paste_escaped
+
+URxvt.clipboard.copycmd:  xclip -i -selection clipboard
+URxvt.clipboard.pastecmd: xclip -o -selection clipboard

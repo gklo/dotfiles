@@ -1,0 +1,70 @@
+filetype plugin indent on
+syntax on
+set t_Co=256
+colorscheme molokai
+" colorscheme setting
+let g:molokai_original = 1
+let g:rehash256 = 1
+
+set encoding=utf8
+set ffs=unix,dos,mac
+set undofile
+set undodir=~/.vim/undo//
+set noswapfile
+
+set wildignorecase
+set wildmode=longest:full,full
+set wildmenu
+
+set mouse=a
+
+highlight Normal ctermbg=none
+highlight CursorLine  cterm=none ctermbg=black guifg=none guibg=black
+set cursorline
+highlight ColorColumn ctermbg=black guibg=black
+set number
+set ruler
+
+set autochdir
+set autoread
+
+set history=1000
+set scrolloff=999
+set hidden
+
+set backspace=eol,start,indent
+set whichwrap+=<,>,h,l
+
+set ignorecase smartcase
+set incsearch
+set showmatch
+
+set lazyredraw
+set magic
+
+set expandtab smarttab
+set textwidth=0
+set shiftwidth=4
+set tabstop=4
+
+set linebreak
+set wrap
+
+set autoindent smartindent
+set clipboard=unnamedplus
+
+autocmd BufNewFile,BufRead *.spec call Spec_settings()
+autocmd BufNewFile,BufRead *.sh call Sh_settings()
+
+function! Spec_settings()
+    setlocal colorcolumn=80
+    setlocal textwidth=80
+    setlocal nowrap
+endfunction
+
+function! Sh_settings()
+    setlocal colorcolumn=80
+    setlocal textwidth=80
+    setlocal shiftwidth=2
+    setlocal softtabstop=2
+endfunction
