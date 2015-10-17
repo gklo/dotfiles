@@ -85,7 +85,7 @@ highlight Visual ctermbg=darkgrey
 " enable linux number
 set number
 set ruler
-set title
+"set title
 
 " mute the sound effects
 set noerrorbells
