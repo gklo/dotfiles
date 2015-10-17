@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# remove existing hosts file
 rm -f hosts
 wget http://someonewhocares.org/hosts/zero/hosts
 
