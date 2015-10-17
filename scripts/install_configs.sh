@@ -1,6 +1,9 @@
 #!/bin/sh
 
-pushd $(dirname $(readlink -f $0))
+pushd $(dirname $(readlink -f $0))/..
+
+git submodule init
+git submodule update
 
 # fontconfig settings
 [ ! -d $HOME/.config/fontconfig ] && mkdir $HOME/.config/fontconfig
