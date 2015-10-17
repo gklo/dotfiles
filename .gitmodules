@@ -43,3 +43,6 @@
 [submodule "urxvt/ext.avail/urxvt-resize-font"]
 	path = urxvt/ext.avail/urxvt-resize-font
 	url = https://github.com/simmel/urxvt-resize-font.git
+[submodule "vim/plugged/nerdcommenter"]
+	path = vim/plugged/nerdcommenter
+	url = https://github.com/scrooloose/nerdcommenter.git
