@@ -1,5 +1,7 @@
 #!/bin/sh
 
+cd $(dirname $(readlink -f $0))
+
 # remove existing hosts file
 rm -f hosts
 wget http://someonewhocares.org/hosts/zero/hosts
@@ -15,6 +17,9 @@ if [ -e whitelist ]; then
     [ ! ${line:0:1} == "#" ] && sed -i "/${line}/ s/^/#/g" hosts
   done < whitelist
 fi
+
+# backup hosts
+[ ! -e system_hosts.bak ] && cp /etc/hosts .
 
 # replace the system hosts
 echo "Replacing the system hosts file ..."
