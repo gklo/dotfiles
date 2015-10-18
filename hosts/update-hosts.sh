@@ -12,7 +12,7 @@ sed -i '/^\:\:1/ s/$/ localhost6/g' hosts
 echo "Processing whitelist ..."
 if [ -e whitelist ]; then
   while read line ; do
-    sed -i "/${line}/ s/^/#/g" hosts
+    [ ! ${line:0:1} == "#" ] && sed -i "/${line}/ s/^/#/g" hosts
   done < whitelist
 fi
 

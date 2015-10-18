@@ -22,6 +22,7 @@ xrdb $HOME/.Xresources
 # vim settings
 [ -d $HOME/.vim ] && mv $HOME/.vim $HOME/.vim.bak
 ln -s $(readlink -f vim) $HOME/.vim
+echo "Please run 'make' in vim/plugged/vimproc.vim to create vimproc module for vim"
 
 # Gnome Terminal settings
 DEFAULTPROF=`dconf list /org/gnome/terminal/legacy/profiles:/`
