@@ -19,7 +19,7 @@ if [ -e whitelist ]; then
 fi
 
 # backup hosts
-[ ! -e system_hosts.bak ] && cp /etc/hosts .
+[ ! -e hosts.original ] && cp /etc/hosts hosts.original
 
 # replace the system hosts
 echo "Replacing the system hosts file ..."
