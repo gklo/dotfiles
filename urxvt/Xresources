@@ -2,7 +2,7 @@ Xcursor.theme:    Vanilla-DMZ-AA
 
 !urxvt color scheme:
 URxvt.depth: 32
-URxvt.background: [50]#151515
+URxvt.background: [65]#000000
 URxvt.foreground: #DEDEDE
 
 ! Molokai MOD

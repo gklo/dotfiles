@@ -46,3 +46,9 @@
 [submodule "vim/plugged/nerdcommenter"]
 	path = vim/plugged/nerdcommenter
 	url = https://github.com/scrooloose/nerdcommenter.git
+[submodule "vim/plugged/ansible-vim"]
+	path = vim/plugged/ansible-vim
+	url = https://git::@github.com/pearofducks/ansible-vim.git
+[submodule "vim/plugged/vim-colors-solarized"]
+	path = vim/plugged/vim-colors-solarized
+	url = https://git::@github.com/altercation/vim-colors-solarized.git
