@@ -39,7 +39,8 @@ sudo dnf makecache
 sudo dnf -y install zsh vim vim-X11 tmux screen irssi git mosh rpmdevtools yum-utils tree rsync \
   rxvt-unicode-256color-ml xclip \
   gnome-tweak-tool flash-plugin nspluginwrapper alsa-plugins-pulseaudio \
-  ibus-table-chinese-quick anthy ibus-anthy google-chrome freetype-freeworld
+  ibus-table-chinese-quick anthy ibus-anthy google-chrome freetype-freeworld \
+  google-croscore*
 sudo dnf -y remove PackageKit-command-not-found naver-nanum-gothic-fonts vlgothic-fonts
 
 echo -e "${YELLOW}Installing Fedy ...${NONE}"
