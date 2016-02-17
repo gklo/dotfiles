@@ -17,14 +17,14 @@ echo -e "${YELLOW}Adding RPM Fusion repos ...${NONE}"
 sudo dnf -y install http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 
 echo -e "${YELLOW}Adding Google Chrome repos ...${NONE}"
-sudo cat << EOF > /etc/yum.repos.d/google-chrome.repo
+sudo bash -c 'cat << EOF > /etc/yum.repos.d/google-chrome.repo
 [google-chrome]
 name=google-chrome
 baseurl=http://dl.google.com/linux/chrome/rpm/stable/x86_64
 enabled=1
 gpgcheck=1
 gpgkey=https://dl.google.com/linux/linux_signing_key.pub
-EOF
+EOF'
 sudo rpm --import https://dl.google.com/linux/linux_signing_key.pub
 
 ## Adobe Flash
@@ -74,6 +74,7 @@ sudo rm /etc/fonts/conf.d/10-scale-bitmap-fonts.conf
 fc-cache -fv
 
 echo -e "${YELLOW}Reducing gnome titlebar height ...${NONE}"
+[ ! -d $HOME/.config/gtk-3.0 ] && mkdir $HOME/.config/gtk-3.0
 cat << EOF >> $HOME/.config/gtk-3.0/gtk.css
 .header-bar.default-decoration {
   padding-top: 3px;
