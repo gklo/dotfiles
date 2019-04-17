@@ -11,6 +11,6 @@ curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs \
 
 cp init.vim ~/.config/nvim
 
-pip3 install --user pynvim
+pip install --user pynvim
 
 nvim +PlugInstall +qall

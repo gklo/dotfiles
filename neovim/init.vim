@@ -12,6 +12,7 @@ Plug 'w0rp/ale'
 Plug 'jiangmiao/auto-pairs'
 Plug 'alvan/vim-closetag'
 Plug 'Valloric/MatchTagAlways'
+Plug 'scrooloose/nerdtree'
 
 " require python3 and pip3 install --user pynvim
 if has('nvim')
@@ -202,3 +203,5 @@ set tw=500
 set ai "Auto indent
 set si "Smart indent
 set wrap "Wrap lines
+
+set mouse=a
