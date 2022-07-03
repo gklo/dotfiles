@@ -11,7 +11,7 @@ require("formatter").setup(
         function()
           return {
             exe = "/usr/local/bin/luafmt",
-            args = {"--indent-count", 2, "--stdin"},
+            args = { "--indent-count", 2, "--stdin" },
             stdin = true
           }
         end
@@ -43,13 +43,13 @@ vim.g.symbols_outline = {
 require "nvim-tree".setup {
   disable_netrw       = false,
   hijack_netrw        = false,
-  update_cwd = false,
+  update_cwd          = false,
   update_focused_file = {
     enable = true,
     update_cwd = true,
     ignore_list = {}
   },
-  view = {
+  view                = {
     width = 40
   }
 }
@@ -61,7 +61,7 @@ vim.g.highlightedyank_highlight_duration = 200
 vim.g.leetcode_browser = "firefox"
 vim.g.leetcode_solution_filetype = "javascript"
 
--- nvim-cmp
+-- nvim-cmpsetup
 local cmp = require "cmp"
 
 -- override the global function to complete word from all buffers
@@ -76,6 +76,34 @@ end
 
 local luasnip = require("luasnip")
 
+local kind_icons = {
+  Text = "",
+  Method = "",
+  Function = "",
+  Constructor = "",
+  Field = "ﰠ",
+  Variable = "",
+  Class = "",
+  Interface = "",
+  Module = "",
+  Property = "",
+  Unit = "",
+  Value = "",
+  Enum = "",
+  Keyword = "",
+  Snippet = "",
+  Color = "",
+  File = "",
+  Reference = "",
+  Folder = "",
+  EnumMember = "",
+  Constant = "",
+  Struct = "פּ",
+  Event = "",
+  Operator = "",
+  TypeParameter = "",
+}
+
 cmp.setup(
   {
     snippet = {
@@ -86,18 +114,18 @@ cmp.setup(
       end,
     },
     mapping = {
-      ["<C-b>"] = cmp.mapping(cmp.mapping.scroll_docs(-4), {"i", "c"}),
-      ["<C-f>"] = cmp.mapping(cmp.mapping.scroll_docs(4), {"i", "c"}),
-      ["<C-Space>"] = cmp.mapping(cmp.mapping.complete(), {"i", "c"}),
+      ["<C-b>"] = cmp.mapping(cmp.mapping.scroll_docs(-4), { "i", "c" }),
+      ["<C-f>"] = cmp.mapping(cmp.mapping.scroll_docs(4), { "i", "c" }),
+      ["<C-Space>"] = cmp.mapping(cmp.mapping.complete(), { "i", "c" }),
       ["<C-y>"] = cmp.config.disable, -- Specify `cmp.config.disable` if you want to remove the default `<C-y>` mapping.
       ["<C-e>"] = cmp.mapping(
         function(fallback)
           luasnip.expand_or_jump()
         end
-        -- {
-        --   i = cmp.mapping.abort(),
-        --   c = cmp.mapping.close()
-        -- }
+      -- {
+      --   i = cmp.mapping.abort(),
+      --   c = cmp.mapping.close()
+      -- }
       ),
       -- Accept currently selected item. If none selected, `select` first item.
       -- Set `select` to `false` to only confirm explicitly selected items.
@@ -114,7 +142,7 @@ cmp.setup(
             fallback()
           end
         end,
-        {"i", "s"}
+        { "i", "s" }
       ),
       ["<S-Tab>"] = cmp.mapping(
         function(fallback)
@@ -126,19 +154,39 @@ cmp.setup(
             fallback()
           end
         end,
-        {"i", "s"}
+        { "i", "s" }
       )
     },
     sources = cmp.config.sources(
       {
-        {name = "nvim_lsp"},
+        { name = "nvim_lsp" },
         -- {name = "vsnip"} -- For vsnip users.
-        {name = "luasnip"}
+        { name = "luasnip" }
       },
       {
-        {name = "buffer"}
+        { name = "buffer" }
       }
-    )
+    ),
+    formatting = {
+      fields = { "kind", "abbr", "menu" },
+      format = function(entry, vim_item)
+        local kind = require("lspkind").cmp_format({ mode = "symbol_text", maxwidth = 50 })(entry, vim_item)
+        local strings = vim.split(kind.kind, "%s", { trimempty = true })
+        kind.kind = " " .. strings[1] .. " "
+        kind.menu = "    (" .. strings[2] .. ")"
+
+        return kind
+      end,
+    },
+    window = {
+      -- completion = cmp.config.window.bordered(),
+      documentation = cmp.config.window.bordered(),
+      completion = {
+        winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,Search:None",
+        col_offset = -3,
+        side_padding = 0,
+      },
+    },
   }
 )
 
@@ -147,7 +195,7 @@ cmp.setup.cmdline(
   "/",
   {
     sources = {
-      {name = "buffer"}
+      { name = "buffer" }
     }
   }
 )
@@ -158,10 +206,10 @@ cmp.setup.cmdline(
   {
     sources = cmp.config.sources(
       {
-        {name = "path"}
+        { name = "path" }
       },
       {
-        {name = "cmdline"}
+        { name = "cmdline" }
       }
     )
   }
@@ -177,7 +225,8 @@ local on_attach = function(client, bufnr)
   local function buf_set_keymap(...)
     vim.api.nvim_buf_set_keymap(bufnr, ...)
   end
-  local opts = {noremap = true, silent = true}
+
+  local opts = { noremap = true, silent = true }
 
   buf_set_keymap("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", opts)
   buf_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
@@ -231,7 +280,7 @@ lsp_installer.on_server_ready(
     if server.name == "tsserver" or server.name == "tailwindcss" then
       opts.root_dir = function(fname)
         return lspconfig.util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git")(fname) or
-          vim.fn.getcwd()
+            vim.fn.getcwd()
       end
     elseif server.name == "eslint" then
       vim.cmd('autocmd BufWritePre *.tsx,*.ts,*.jsx,*.js EslintFixAll')
@@ -249,7 +298,7 @@ lsp_installer.on_server_ready(
           },
           diagnostics = {
             -- Get the language server to recognize the `vim` global
-            globals = {"vim"}
+            globals = { "vim" }
           },
           workspace = {
             -- Make the server aware of Neovim runtime files
@@ -271,7 +320,8 @@ require "lsp_signature".setup()
 
 -- treesitter
 require "nvim-treesitter.configs".setup {
-  ensure_installed = {"html", "css", "scss", "vim", "lua", "javascript", "typescript", "tsx", "json", "python", "vue", 'rust', 'bash', 'elm', 'elixir'},
+  ensure_installed = { "html", "css", "scss", "vim", "lua", "javascript", "typescript", "tsx", "json", "python", "vue",
+    'rust', 'bash', 'elm', 'elixir' },
   highlight = {
     enable = true,
     additional_vim_regex_highlighting = false
@@ -331,7 +381,7 @@ require("Comment").setup {
 require("nvim-autopairs").setup {}
 -- If you want insert `(` after select function or method item
 local cmp_autopairs = require("nvim-autopairs.completion.cmp")
-cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done({map_char = {tex = ""}}))
+cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done({ map_char = { tex = "" } }))
 -- add a lisp filetype (wrap my-function), FYI: Hardcoded = { "clojure", "clojurescript", "fennel", "janet" }
 -- cmp_autopairs.lisp[#cmp_autopairs.lisp + 1] = "racket"
 
@@ -343,16 +393,17 @@ gps.setup()
 local function tabStopStatus()
   return " " .. vim.api.nvim_get_option("tabstop")
 end
+
 require("lualine").setup {
   options = {
     -- theme = 'palenight',
     theme = "auto",
     component_separators = "|",
-    section_separators = {left = "", right = ""}
+    section_separators = { left = "", right = "" }
   },
   sections = {
     lualine_a = {
-      {"mode", separator = {left = ""}, right_padding = 2, fmt = function(str) return str:sub(1,1) .. ' ' end}
+      { "mode", separator = { left = "" }, right_padding = 2, fmt = function(str) return str:sub(1, 1) .. ' ' end }
     },
     lualine_b = {
       {
@@ -367,15 +418,15 @@ require("lualine").setup {
       "branch",
       "diff"
     },
-    lualine_c = {{gps.get_location, cond = gps.is_available}},
+    lualine_c = { { gps.get_location, cond = gps.is_available } },
     lualine_x = {},
-    lualine_y = {"filetype", "fileformat", tabStopStatus, "diagnostics"},
+    lualine_y = { "filetype", "fileformat", tabStopStatus, "diagnostics" },
     lualine_z = {
-      {"progress", separator = {right = ""}, left_padding = 2}
+      { "progress", separator = { right = "" }, left_padding = 2 }
     }
   },
   inactive_sections = {
-    lualine_a = {"filename"},
+    lualine_a = { "filename" },
     lualine_b = {},
     lualine_c = {},
     lualine_x = {},
@@ -383,7 +434,7 @@ require("lualine").setup {
     lualine_z = {}
   },
   tabline = {},
-  extensions = {"toggleterm", "fugitive", "nvim-tree"}
+  extensions = { "toggleterm", "fugitive", "nvim-tree" }
 }
 
 -- colorizer
@@ -406,3 +457,6 @@ require("indent_blankline").setup {
   show_current_context = true,
   show_current_context_start = true,
 }
+
+-- gitsign
+require('gitsigns').setup()

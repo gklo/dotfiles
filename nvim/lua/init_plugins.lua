@@ -5,7 +5,7 @@ require "paq" {
   "nvim-lua/plenary.nvim",
   "tpope/vim-repeat",
   -- treesitter
-    "nvim-treesitter/nvim-treesitter",
+  "nvim-treesitter/nvim-treesitter",
   -- {
   --   "nvim-treesitter/nvim-treesitter",
   --   run = function()
@@ -20,7 +20,7 @@ require "paq" {
   "jlcrochet/vim-razor",
   "kchmck/vim-coffee-script",
   "alampros/vim-styled-jsx",
-  {"styled-components/vim-styled-components", branch = "main"},
+  { "styled-components/vim-styled-components", branch = "main" },
   -- telescope
   "nvim-telescope/telescope.nvim",
   "nvim-telescope/telescope-file-browser.nvim",
@@ -63,7 +63,8 @@ require "paq" {
   -- Plug 'dracula/vim', { 'as': 'dracula' }
   -- "navarasu/onedark.nvim",
   "lourenci/github-colors",
-  "christianchiarulli/nvcode-color-schemes.vim",
+  -- "christianchiarulli/nvcode-color-schemes.vim",
+  'shaunsingh/nord.nvim',
   "kyazdani42/nvim-web-devicons",
   "ryanoasis/vim-devicons",
   -- others
@@ -79,5 +80,7 @@ require "paq" {
   "lukas-reineke/indent-blankline.nvim",
   'f-person/git-blame.nvim',
   'chaoren/vim-wordmotion',
-  'sindrets/diffview.nvim'
+  'sindrets/diffview.nvim',
+  'lewis6991/gitsigns.nvim',
+  'onsails/lspkind.nvim'
 }
