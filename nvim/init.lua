@@ -1,3 +1,4 @@
+vim.g.mapleader = ' '
 vim.o.hidden = true
 vim.o.backup = false
 vim.o.writebackup = false
@@ -82,7 +83,8 @@ vim.o.titlestring = "%(%{expand('%:~:.:h')}%)\\%t"
 vim.o.fixendofline = false
 
 --hide the tilde characters on the blank lines
-vim.opt.fillchars:append({eob = " ", vert = "▏"})
+--better diff looking
+vim.opt.fillchars:append({eob = " ", vert = "▏", diff = "╱"})
 
 -- enable replace preview
 vim.o.inccommand = "split"
@@ -91,6 +93,7 @@ vim.o.wrap = false
 vim.o.foldlevel = 20
 vim.wo.foldmethod = 'expr'
 vim.wo.foldexpr = 'nvim_treesitter#foldexpr()'
+
 
 require("init_plugins")
 require("init_setup_plugins")

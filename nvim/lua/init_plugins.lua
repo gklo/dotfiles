@@ -32,7 +32,8 @@ require "paq" {
   "SmiteshP/nvim-gps",
   "phaazon/hop.nvim",
   "tpope/vim-fugitive",
-  "tpope/vim-surround",
+  -- "tpope/vim-surround",
+  "machakann/vim-sandwich",
   "machakann/vim-highlightedyank",
   "akinsho/toggleterm.nvim",
   "norcalli/nvim-colorizer.lua",
@@ -61,6 +62,8 @@ require "paq" {
   --Plug 'rakr/vim-one' " Doesn't support treesitter/cmp
   -- Plug 'dracula/vim', { 'as': 'dracula' }
   -- "navarasu/onedark.nvim",
+  "lourenci/github-colors",
+  "christianchiarulli/nvcode-color-schemes.vim",
   "kyazdani42/nvim-web-devicons",
   "ryanoasis/vim-devicons",
   -- others
@@ -73,6 +76,8 @@ require "paq" {
   -- optimized cursorline
   "yamatsum/nvim-cursorline",
   "ahmedkhalf/project.nvim",
-  "lourenci/github-colors",
-  "christianchiarulli/nvcode-color-schemes.vim"
+  "lukas-reineke/indent-blankline.nvim",
+  'f-person/git-blame.nvim',
+  'chaoren/vim-wordmotion',
+  'sindrets/diffview.nvim'
 }

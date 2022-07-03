@@ -1,6 +1,5 @@
 -- theme
-vim.cmd("let g:nvcode_termcolors=256")
-vim.cmd("colorscheme onedark")
+vim.cmd("colorscheme nord")
 vim.cmd("highlight SignColumn guibg=NONE ctermbg=NONE")
 
 -- formatter
@@ -30,6 +29,10 @@ require "toggleterm".setup {
 local telescope = require("telescope")
 telescope.load_extension "file_browser"
 telescope.load_extension "projects"
+telescope.setup {
+  defaults = require('telescope.themes').get_ivy {
+  },
+}
 
 -- symbols
 vim.g.symbols_outline = {
@@ -42,13 +45,13 @@ require "nvim-tree".setup {
   hijack_netrw        = false,
   update_cwd = false,
   update_focused_file = {
-   enable = true,
-   update_cwd = true,
-   ignore_list = {}
- },
- view = {
-   width = 40
- }
+    enable = true,
+    update_cwd = true,
+    ignore_list = {}
+  },
+  view = {
+    width = 40
+  }
 }
 
 -- yank highlight
@@ -185,17 +188,34 @@ local on_attach = function(client, bufnr)
   -- buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
   -- buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
   -- buf_set_keymap("n", "<space>D", "<cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
-  -- buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+  buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   buf_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
-  buf_set_keymap("n", "<leader>e", "<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>", opts)
-  buf_set_keymap("n", "[d", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", opts)
-  buf_set_keymap("n", "]d", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", opts)
+  -- buf_set_keymap("n", "<leader>e", "<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>", opts)
+  buf_set_keymap("n", "g[", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", opts)
+  buf_set_keymap("n", "g]", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", opts)
   -- buf_set_keymap("n", "<leader>fd", "<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
-  -- buf_set_keymap("n", "<leader>fd", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+  buf_set_keymap("n", "<leader>ef", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
   buf_set_keymap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", opts)
 
   -- illuminate integrated with lsp
   require 'illuminate'.on_attach(client)
+
+  if client.server_capabilities.documentHighlightProvider then
+    vim.api.nvim_create_augroup("lsp_document_highlight", { clear = true })
+    vim.api.nvim_clear_autocmds { buffer = bufnr, group = "lsp_document_highlight" }
+    vim.api.nvim_create_autocmd("CursorHold", {
+      callback = vim.lsp.buf.document_highlight,
+      buffer = bufnr,
+      group = "lsp_document_highlight",
+      desc = "Document Highlight",
+    })
+    vim.api.nvim_create_autocmd("CursorMoved", {
+      callback = vim.lsp.buf.clear_references,
+      buffer = bufnr,
+      group = "lsp_document_highlight",
+      desc = "Clear All the References",
+    })
+  end
 end
 
 -- Register a handler that will be called for all installed servers.
@@ -204,7 +224,8 @@ lsp_installer.on_server_ready(
   function(server)
     local opts = {
       capabilities = capabilities,
-      on_attach = on_attach
+      on_attach = on_attach,
+      automatic_installation = true
     }
 
     if server.name == "tsserver" or server.name == "tailwindcss" then
@@ -212,6 +233,8 @@ lsp_installer.on_server_ready(
         return lspconfig.util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git")(fname) or
           vim.fn.getcwd()
       end
+    elseif server.name == "eslint" then
+      vim.cmd('autocmd BufWritePre *.tsx,*.ts,*.jsx,*.js EslintFixAll')
     elseif server.name == "sumneko_lua" then
       local runtime_path = vim.split(package.path, ";")
       table.insert(runtime_path, "lua/?.lua")
@@ -310,7 +333,7 @@ require("nvim-autopairs").setup {}
 local cmp_autopairs = require("nvim-autopairs.completion.cmp")
 cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done({map_char = {tex = ""}}))
 -- add a lisp filetype (wrap my-function), FYI: Hardcoded = { "clojure", "clojurescript", "fennel", "janet" }
-cmp_autopairs.lisp[#cmp_autopairs.lisp + 1] = "racket"
+-- cmp_autopairs.lisp[#cmp_autopairs.lisp + 1] = "racket"
 
 -- nvim-gps
 local gps = require "nvim-gps"
@@ -329,11 +352,12 @@ require("lualine").setup {
   },
   sections = {
     lualine_a = {
-      {"mode", separator = {left = ""}, right_padding = 2}
+      {"mode", separator = {left = ""}, right_padding = 2, fmt = function(str) return str:sub(1,1) .. ' ' end}
     },
     lualine_b = {
       {
         "filename",
+        path = 1,
         symbols = {
           modified = "*", -- Text to show when the file is modified.
           readonly = " ", -- Text to show when the file is non-modifiable or readonly.
@@ -374,4 +398,11 @@ require "hop".setup()
 
 -- projects
 require("project_nvim").setup {
+}
+
+-- indent blank line
+require("indent_blankline").setup {
+  -- for example, context is off by default, use this to turn it on
+  show_current_context = true,
+  show_current_context_start = true,
 }
