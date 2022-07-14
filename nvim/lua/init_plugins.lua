@@ -82,5 +82,10 @@ require "paq" {
   'chaoren/vim-wordmotion',
   'sindrets/diffview.nvim',
   'lewis6991/gitsigns.nvim',
-  'onsails/lspkind.nvim'
+  'onsails/lspkind.nvim',
+  'petertriho/nvim-scrollbar',
+  'folke/tokyonight.nvim',
+  'tpope/vim-sleuth',
+  'navarasu/onedark.nvim',
+  'narutoxy/dim.lua'
 }

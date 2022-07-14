@@ -1,5 +1,9 @@
 -- theme
-vim.cmd("colorscheme nord")
+-- vim.cmd("colorscheme nord")
+require('onedark').setup({
+  style = 'dark'
+})
+require('onedark').load()
 vim.cmd("highlight SignColumn guibg=NONE ctermbg=NONE")
 
 -- formatter
@@ -460,3 +464,9 @@ require("indent_blankline").setup {
 
 -- gitsign
 require('gitsigns').setup()
+
+-- scrollbar
+require("scrollbar").setup()
+
+-- dim unused
+require('dim').setup()

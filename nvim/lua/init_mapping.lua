@@ -58,6 +58,7 @@ map { "n", "<leader>ei", "gg=G<c-o>" }
 
 -- diff view
 map { "n", "<leader>do", ":DiffviewOpen " }
+map { "n", "<leader>dc", ":DiffviewClose<CR>" }
 map { "n", "<leader>df", ":DiffviewFileHistory %<CR>" }
 map { "n", "<leader>dt", ":DiffviewToggleFiles<CR>" }
 
