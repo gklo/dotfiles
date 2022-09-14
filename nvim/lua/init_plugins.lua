@@ -61,9 +61,6 @@ require "paq" {
   -- theme
   --Plug 'rakr/vim-one' " Doesn't support treesitter/cmp
   -- Plug 'dracula/vim', { 'as': 'dracula' }
-  -- "navarasu/onedark.nvim",
-  "lourenci/github-colors",
-  -- "christianchiarulli/nvcode-color-schemes.vim",
   'shaunsingh/nord.nvim',
   "kyazdani42/nvim-web-devicons",
   "ryanoasis/vim-devicons",
@@ -87,5 +84,11 @@ require "paq" {
   'folke/tokyonight.nvim',
   'tpope/vim-sleuth',
   'navarasu/onedark.nvim',
-  'narutoxy/dim.lua'
+  'narutoxy/dim.lua',
+  'Mofiqul/dracula.nvim',
+  --[[ 'sunjon/shade.nvim', ]]
+  'projekt0n/github-nvim-theme',
+  --[[ 'rmagatti/goto-preview', ]]
+  'glepnir/lspsaga.nvim',
+  'stevearc/dressing.nvim'
 }

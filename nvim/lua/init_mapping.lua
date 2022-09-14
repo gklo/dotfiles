@@ -42,7 +42,6 @@ map { "t", "<c-a>", "<cmd>ToggleTerm<CR>" }
 -- telescope
 map { "n", "<leader>ff", "<cmd>Telescope find_files<cr>" }
 map { "n", "<leader>fg", "<cmd>Telescope live_grep<cr>" }
-map { "n", "<leader>fG", '<cmd>lua require("telescope").extensions.live_grep_raw.live_grep_raw()<cr>' }
 map { "n", "<leader>fb", "<cmd>Telescope buffers<cr>" }
 map { "n", "<leader>fh", "<cmd>Telescope oldfiles<cr>" }
 map { "n", "<leader>fH", "<cmd>Telescope help_tags<cr>" }
@@ -79,3 +78,11 @@ map { "", "t",
   "<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.AFTER_CURSOR, current_line_only = true,  hint_offset = -1 })<cr>" }
 map { "", "T",
   "<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.BEFORE_CURSOR, current_line_only = true, hint_offset = 1 })<cr>" }
+
+-- lspsaga
+map { "n", "gr", "<cmd>Lspsaga lsp_finder<CR>", { slient = true } }
+map { "n", "gh", "<cmd>Lspsaga show_line_diagnostics<CR>", { slient = true } }
+map { "n", "g[", "<cmd>Lspsaga diagnostic_jump_prev<CR>", { slient = true } }
+map { "n", "g]", "<cmd>Lspsaga diagnostic_jump_next<CR>", { slient = true } }
+map { "n", "gp", "<cmd>Lspsaga peek_definition<CR>", { silent = true } }
+map { "n", "ga", "<cmd>Lspsaga code_action<CR>", { silent = true } }

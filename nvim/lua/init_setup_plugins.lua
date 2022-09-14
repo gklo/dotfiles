@@ -1,9 +1,14 @@
 -- theme
 -- vim.cmd("colorscheme nord")
-require('onedark').setup({
-  style = 'dark'
+--[[ require('onedark').setup({ ]]
+--[[   style = 'cool' ]]
+--[[ }) ]]
+--[[ require('onedark').load() ]]
+require("github-theme").setup({
+  theme_style = "dimmed",
+  -- other config
 })
-require('onedark').load()
+--[[ vim.cmd('colorscheme github_dark_default') ]]
 vim.cmd("highlight SignColumn guibg=NONE ctermbg=NONE")
 
 -- formatter
@@ -80,33 +85,33 @@ end
 
 local luasnip = require("luasnip")
 
-local kind_icons = {
-  Text = "",
-  Method = "",
-  Function = "",
-  Constructor = "",
-  Field = "ﰠ",
-  Variable = "",
-  Class = "",
-  Interface = "",
-  Module = "",
-  Property = "",
-  Unit = "",
-  Value = "",
-  Enum = "",
-  Keyword = "",
-  Snippet = "",
-  Color = "",
-  File = "",
-  Reference = "",
-  Folder = "",
-  EnumMember = "",
-  Constant = "",
-  Struct = "פּ",
-  Event = "",
-  Operator = "",
-  TypeParameter = "",
-}
+--[[ local kind_icons = { ]]
+--[[   Text = "", ]]
+--[[   Method = "", ]]
+--[[   Function = "", ]]
+--[[   Constructor = "", ]]
+--[[   Field = "ﰠ", ]]
+--[[   Variable = "", ]]
+--[[   Class = "", ]]
+--[[   Interface = "", ]]
+--[[   Module = "", ]]
+--[[   Property = "", ]]
+--[[   Unit = "", ]]
+--[[   Value = "", ]]
+--[[   Enum = "", ]]
+--[[   Keyword = "", ]]
+--[[   Snippet = "", ]]
+--[[   Color = "", ]]
+--[[   File = "", ]]
+--[[   Reference = "", ]]
+--[[   Folder = "", ]]
+--[[   EnumMember = "", ]]
+--[[   Constant = "", ]]
+--[[   Struct = "פּ", ]]
+--[[   Event = "", ]]
+--[[   Operator = "", ]]
+--[[   TypeParameter = "", ]]
+--[[ } ]]
 
 cmp.setup(
   {
@@ -234,7 +239,7 @@ local on_attach = function(client, bufnr)
 
   buf_set_keymap("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", opts)
   buf_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
-  buf_set_keymap("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
+  --[[ buf_set_keymap("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", opts) ]]
   buf_set_keymap("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", opts)
   -- buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
   -- buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
@@ -242,10 +247,10 @@ local on_attach = function(client, bufnr)
   -- buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
   -- buf_set_keymap("n", "<space>D", "<cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
   buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-  buf_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
+  --[[ buf_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts) ]]
   -- buf_set_keymap("n", "<leader>e", "<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>", opts)
-  buf_set_keymap("n", "g[", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", opts)
-  buf_set_keymap("n", "g]", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", opts)
+  --[[ buf_set_keymap("n", "g[", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", opts) ]]
+  --[[ buf_set_keymap("n", "g]", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", opts) ]]
   -- buf_set_keymap("n", "<leader>fd", "<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
   buf_set_keymap("n", "<leader>ef", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
   buf_set_keymap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", opts)
@@ -320,7 +325,9 @@ lsp_installer.on_server_ready(
   end
 )
 
-require "lsp_signature".setup()
+--[[ require "lsp_signature".setup { ]]
+--[[   floating_window = false ]]
+--[[ } ]]
 
 -- treesitter
 require "nvim-treesitter.configs".setup {
@@ -470,3 +477,37 @@ require("scrollbar").setup()
 
 -- dim unused
 require('dim').setup()
+
+-- dim window
+--[[ require'shade'.setup({ ]]
+--[[   overlay_opacity = 50, ]]
+--[[   opacity_step = 1, ]]
+--[[ }) ]]
+
+-- preview
+--[[ require('goto-preview').setup { ]]
+--[[   default_mappings = true; ]]
+--[[ } ]]
+
+-- lspsaga
+require("lspsaga").init_lsp_saga({
+  rename_in_select = false,
+  finder_action_keys = {
+    open = "<CR>",
+    vsplit = "s",
+    split = "i",
+    tabe = "t",
+    quit = "q",
+  },
+  code_action_keys = {
+    quit = "q",
+    exec = "<CR>",
+  },
+  definition_action_keys = {
+    edit = '<CR>',
+    vsplit = '<C-v>',
+    split = '<C-x>',
+    tabe = '<C-t>',
+    quit = 'q',
+  },
+})
