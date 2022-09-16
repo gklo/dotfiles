@@ -511,3 +511,10 @@ require("lspsaga").init_lsp_saga({
     quit = 'q',
   },
 })
+
+-- ufo
+require("ufo").setup {
+  provider_selector = function(bufnr, filetype)
+    return { "treesitter", "indent" }
+  end,
+}

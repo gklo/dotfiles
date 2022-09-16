@@ -7,6 +7,7 @@ if status is-interactive
     mcfly init fish | source
     zoxide init fish | source
     alias icat="kitty +kitten icat"
+    alias cat=bat
     alias vim=nvim    
     alias ls=exa
     alias ll="exa -l"    

@@ -90,5 +90,7 @@ require "paq" {
   'projekt0n/github-nvim-theme',
   --[[ 'rmagatti/goto-preview', ]]
   'glepnir/lspsaga.nvim',
-  'stevearc/dressing.nvim'
+  'stevearc/dressing.nvim',
+  'kevinhwang91/promise-async',
+  'kevinhwang91/nvim-ufo'
 }
