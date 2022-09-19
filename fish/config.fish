@@ -13,6 +13,8 @@ if status is-interactive
     alias ll="exa -l"    
     alias man="batman"
     alias grep="rg"
+    alias nvm="fnm"
+    fnm env --use-on-cd | source
 
     function vim-win
       ssh my-boot-camp -f "nvim --listen 0.0.0.0:8899 --headless" && nvim-qt --server my-boot-camp:8899    
