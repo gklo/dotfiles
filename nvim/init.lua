@@ -29,7 +29,7 @@ vim.o.wildignorecase = true
 vim.o.wildmode = "longest:full,full"
 vim.o.wildmenu = true
 
-vim.o.completeopt = "menuone,noselect"
+vim.o.completeopt = "menu,menuone,noselect"
 vim.o.cmdheight = 1
 
 --system
@@ -59,7 +59,7 @@ vim.o.foldnestmax = 1
 --autocmd BufWritePre * %s/\s\+$//e
 
 -- fix syntax highlighting
-vim.cmd("autocmd BufEnter * :syn sync fromstart")
+-- vim.cmd("autocmd BufEnter * :syn sync fromstart")
 
 -- show pressed key
 vim.o.showcmd = true
