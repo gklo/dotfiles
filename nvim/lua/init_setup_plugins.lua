@@ -85,34 +85,6 @@ end
 
 local luasnip = require("luasnip")
 
---[[ local kind_icons = { ]]
---[[   Text = "", ]]
---[[   Method = "", ]]
---[[   Function = "", ]]
---[[   Constructor = "", ]]
---[[   Field = "ﰠ", ]]
---[[   Variable = "", ]]
---[[   Class = "", ]]
---[[   Interface = "", ]]
---[[   Module = "", ]]
---[[   Property = "", ]]
---[[   Unit = "", ]]
---[[   Value = "", ]]
---[[   Enum = "", ]]
---[[   Keyword = "", ]]
---[[   Snippet = "", ]]
---[[   Color = "", ]]
---[[   File = "", ]]
---[[   Reference = "", ]]
---[[   Folder = "", ]]
---[[   EnumMember = "", ]]
---[[   Constant = "", ]]
---[[   Struct = "פּ", ]]
---[[   Event = "", ]]
---[[   Operator = "", ]]
---[[   TypeParameter = "", ]]
---[[ } ]]
-
 cmp.setup(
   {
     snippet = {
@@ -225,10 +197,17 @@ cmp.setup.cmdline(
 )
 
 -- lspconfig.
+local lspconfig = require "lspconfig"
+require("mason").setup()
+require("mason-lspconfig").setup({
+  ensure_installed = { 'tsserver', 'tailwindcss', 'volar', 'sqlls', 'pyright', 'intelephense', 'marksman', 'eslint',
+    'cssls', 'html', 'yamlls', 'jsonls', 'quick_lint_js' },
+  automatic_installation = true
+})
+
 local capabilities = require("cmp_nvim_lsp").update_capabilities(vim.lsp.protocol.make_client_capabilities())
 -- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
-local lspconfig = require "lspconfig"
-local lsp_installer = require("nvim-lsp-installer")
+--[[ local lsp_installer = require("nvim-lsp-installer") ]]
 
 local on_attach = function(client, bufnr)
   local function buf_set_keymap(...)
@@ -236,6 +215,7 @@ local on_attach = function(client, bufnr)
   end
 
   local opts = { noremap = true, silent = true }
+
 
   buf_set_keymap("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", opts)
   buf_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
@@ -276,24 +256,23 @@ local on_attach = function(client, bufnr)
   end
 end
 
--- Register a handler that will be called for all installed servers.
--- Alternatively, you may also register handlers on specific server instances instead (see example below).
-lsp_installer.on_server_ready(
-  function(server)
+require("mason-lspconfig").setup_handlers({
+  function(server_name) -- default handler (optional)
     local opts = {
-      capabilities = capabilities,
       on_attach = on_attach,
-      automatic_installation = true
+      capabilities = capabilities
     }
 
-    if server.name == "tsserver" or server.name == "tailwindcss" then
+    if server_name == 'tsserver' or server_name == 'tailwindcss' then
       opts.root_dir = function(fname)
         return lspconfig.util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git")(fname) or
             vim.fn.getcwd()
       end
-    elseif server.name == "eslint" then
+      opts.single_file_support = true
+    elseif server_name == 'eslint' then
       vim.cmd('autocmd BufWritePre *.tsx,*.ts,*.jsx,*.js EslintFixAll')
-    elseif server.name == "sumneko_lua" then
+      opts.single_file_support = true
+    elseif server_name == "sumneko_lua" then
       local runtime_path = vim.split(package.path, ";")
       table.insert(runtime_path, "lua/?.lua")
       table.insert(runtime_path, "lua/?/init.lua")
@@ -321,9 +300,9 @@ lsp_installer.on_server_ready(
       }
     end
 
-    server:setup(opts)
+    require("lspconfig")[server_name].setup(opts)
   end
-)
+})
 
 --[[ require "lsp_signature".setup { ]]
 --[[   floating_window = false ]]
@@ -476,7 +455,7 @@ require('gitsigns').setup()
 require("scrollbar").setup()
 
 -- dim unused
-require('dim').setup()
+require('dim').setup({})
 
 -- dim window
 --[[ require'shade'.setup({ ]]

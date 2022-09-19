@@ -42,8 +42,9 @@ require "paq" {
   "kyazdani42/nvim-tree.lua",
   -- LSP
   "neovim/nvim-lspconfig",
-  "williamboman/nvim-lsp-installer",
-  "simrat39/symbols-outline.nvim",
+  --[[ "williamboman/nvim-lsp-installer", ]]
+  "williamboman/mason.nvim",
+  "williamboman/mason-lspconfig.nvim",
   "ray-x/lsp_signature.nvim",
   -- completion with LSP
   -- "hrsh7th/vim-vsnip",
