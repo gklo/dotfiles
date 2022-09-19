@@ -17,8 +17,8 @@ require "paq" {
   "nvim-treesitter/nvim-treesitter-refactor",
   -- specfic syntax
   "dag/vim-fish",
-  "jlcrochet/vim-razor",
-  "kchmck/vim-coffee-script",
+  --[[ "jlcrochet/vim-razor", ]]
+  --[[ "kchmck/vim-coffee-script", ]]
   "alampros/vim-styled-jsx",
   { "styled-components/vim-styled-components", branch = "main" },
   -- telescope
