@@ -36,8 +36,22 @@ map { "n", "p", "]p" }
 vim.cmd "command -nargs=1 -bar STab :set shiftwidth=<args> tabstop=<args> softtabstop=<args>"
 
 -- toggleterm
-map { "n", "<c-a>", "<cmd>ToggleTerm<CR>" }
-map { "t", "<c-a>", "<cmd>ToggleTerm<CR>" }
+map { "n", "<c-a>", '<Cmd>exe v:count1 . "ToggleTerm"<CR>' }
+map { "t", "<c-a>", '<Cmd>exe v:count1 . "ToggleTerm"<CR>' }
+
+function _G.set_terminal_keymaps()
+  local opts = { buffer = 0 }
+  vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
+  vim.keymap.set('t', 'jk', [[<C-\><C-n>]], opts)
+  vim.keymap.set('t', '<C-h>', [[<Cmd>wincmd h<CR>]], opts)
+  vim.keymap.set('t', '<C-j>', [[<Cmd>wincmd j<CR>]], opts)
+  vim.keymap.set('t', '<C-k>', [[<Cmd>wincmd k<CR>]], opts)
+  vim.keymap.set('t', '<C-l>', [[<Cmd>wincmd l<CR>]], opts)
+  vim.keymap.set('t', '<C-w><c-w>', [[<C-\><C-n><c-w>w]], opts)
+end
+
+-- if you only want these mappings for toggle term use term://*toggleterm#* instead
+vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
 
 -- telescope
 map { "n", "<leader>ff", "<cmd>Telescope find_files<cr>" }

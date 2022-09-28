@@ -31,7 +31,7 @@ require("formatter").setup(
 
 -- ToggleTerm
 require "toggleterm".setup {
-  direction = "float"
+  direction = "horizontal"
 }
 
 -- Telescope
@@ -163,7 +163,7 @@ cmp.setup(
       -- completion = cmp.config.window.bordered(),
       documentation = cmp.config.window.bordered(),
       completion = {
-        winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,Search:None",
+        --[[ winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,Search:None", ]]
         col_offset = -3,
         side_padding = 0,
       },

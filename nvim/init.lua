@@ -99,6 +99,9 @@ vim.g.nord_borders = true
 vim.g.nord_disable_background = false
 vim.g.nord_italic = false
 
+-- disable terminal numbers
+vim.cmd('autocmd TermOpen * setlocal nonumber norelativenumber')
+
 require("init_plugins")
 require("init_setup_plugins")
 require("init_mapping")
