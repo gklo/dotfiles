@@ -5,13 +5,12 @@ require "paq" {
   "nvim-lua/plenary.nvim",
   "tpope/vim-repeat",
   -- treesitter
-  "nvim-treesitter/nvim-treesitter",
-  -- {
-  --   "nvim-treesitter/nvim-treesitter",
-  --   run = function()
-  --     vim.cmd "TSUpdate"
-  --   end
-  -- },
+  {
+    "nvim-treesitter/nvim-treesitter",
+    run = function()
+      vim.cmd "TSUpdate"
+    end
+  },
   "JoosepAlviste/nvim-ts-context-commentstring",
   "romgrk/nvim-treesitter-context",
   "nvim-treesitter/nvim-treesitter-refactor",
@@ -47,16 +46,15 @@ require "paq" {
   "williamboman/mason-lspconfig.nvim",
   "ray-x/lsp_signature.nvim",
   -- completion with LSP
-  -- "hrsh7th/vim-vsnip",
-  -- "hrsh7th/vim-vsnip-integ",
   "hrsh7th/cmp-nvim-lsp",
   "hrsh7th/cmp-buffer",
   "hrsh7th/cmp-path",
   "hrsh7th/cmp-cmdline",
   "hrsh7th/nvim-cmp",
-
   'L3MON4D3/LuaSnip',
   'saadparwaiz1/cmp_luasnip',
+  'rafamadriz/friendly-snippets',
+  'mlaursen/vim-react-snippets',
   -- fancy line
   "nvim-lualine/lualine.nvim",
   -- theme
@@ -91,7 +89,9 @@ require "paq" {
   'projekt0n/github-nvim-theme',
   --[[ 'rmagatti/goto-preview', ]]
   'glepnir/lspsaga.nvim',
+  'j-hui/fidget.nvim',
   'stevearc/dressing.nvim',
   'kevinhwang91/promise-async',
-  'kevinhwang91/nvim-ufo'
+  --[[ 'kevinhwang91/nvim-ufo', ]]
+  'folke/twilight.nvim',
 }

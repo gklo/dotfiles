@@ -1,15 +1,9 @@
 -- theme
--- vim.cmd("colorscheme nord")
---[[ require('onedark').setup({ ]]
---[[   style = 'cool' ]]
---[[ }) ]]
---[[ require('onedark').load() ]]
 require("github-theme").setup({
   theme_style = "dimmed",
-  -- other config
 })
 --[[ vim.cmd('colorscheme github_dark_default') ]]
-vim.cmd("highlight SignColumn guibg=NONE ctermbg=NONE")
+vim.cmd("highlight signcolumn guibg=none ctermbg=none")
 
 -- formatter
 require("formatter").setup(
@@ -29,12 +23,12 @@ require("formatter").setup(
   }
 )
 
--- ToggleTerm
+-- toggleterm
 require "toggleterm".setup {
   direction = "horizontal"
 }
 
--- Telescope
+-- telescope
 local telescope = require("telescope")
 telescope.load_extension "file_browser"
 telescope.load_extension "projects"
@@ -71,144 +65,102 @@ vim.g.leetcode_browser = "firefox"
 vim.g.leetcode_solution_filetype = "javascript"
 
 -- nvim-cmpsetup
-local cmp = require "cmp"
-
--- override the global function to complete word from all buffers
-get_bufnrs = function()
-  return vim.api.nvim_list_bufs()
-end
-
+local cmp = require 'cmp'
+local luasnip = require("luasnip")
+local lspkind = require'lspkind'
 local has_words_before = function()
   local line, col = unpack(vim.api.nvim_win_get_cursor(0))
   return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
 end
 
-local luasnip = require("luasnip")
+require("luasnip.loaders.from_vscode").lazy_load()
 
-cmp.setup(
-  {
-    snippet = {
-      -- REQUIRED - you must specify a snippet engine
-      expand = function(args)
-        -- vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-        require("luasnip").lsp_expand(args.body) -- For `luasnip` users.
-      end,
-    },
-    mapping = {
-      ["<C-b>"] = cmp.mapping(cmp.mapping.scroll_docs(-4), { "i", "c" }),
-      ["<C-f>"] = cmp.mapping(cmp.mapping.scroll_docs(4), { "i", "c" }),
-      ["<C-Space>"] = cmp.mapping(cmp.mapping.complete(), { "i", "c" }),
-      ["<C-y>"] = cmp.config.disable, -- Specify `cmp.config.disable` if you want to remove the default `<C-y>` mapping.
-      ["<C-e>"] = cmp.mapping(
-        function(fallback)
-          luasnip.expand_or_jump()
-        end
-      -- {
-      --   i = cmp.mapping.abort(),
-      --   c = cmp.mapping.close()
-      -- }
-      ),
-      -- Accept currently selected item. If none selected, `select` first item.
-      -- Set `select` to `false` to only confirm explicitly selected items.
-      ['<CR>'] = cmp.mapping.confirm({ select = true }),
-      ["<Tab>"] = cmp.mapping(
-        function(fallback)
-          if cmp.visible() then
-            cmp.select_next_item()
-          elseif luasnip.expand_or_jumpable() then
-            luasnip.expand_or_jump()
-          elseif has_words_before() then
-            cmp.complete()
-          else
-            fallback()
-          end
-        end,
-        { "i", "s" }
-      ),
-      ["<S-Tab>"] = cmp.mapping(
-        function(fallback)
-          if cmp.visible() then
-            cmp.select_prev_item()
-          elseif luasnip.jumpable(-1) then
-            luasnip.jump(-1)
-          else
-            fallback()
-          end
-        end,
-        { "i", "s" }
-      )
-    },
-    sources = cmp.config.sources(
-      {
-        { name = "nvim_lsp" },
-        -- {name = "vsnip"} -- For vsnip users.
-        { name = "luasnip" }
-      },
-      {
-        { name = "buffer" }
-      }
-    ),
-    formatting = {
-      fields = { "kind", "abbr", "menu" },
-      format = function(entry, vim_item)
-        local kind = require("lspkind").cmp_format({ mode = "symbol_text", maxwidth = 50 })(entry, vim_item)
-        local strings = vim.split(kind.kind, "%s", { trimempty = true })
-        kind.kind = " " .. strings[1] .. " "
-        kind.menu = "    (" .. strings[2] .. ")"
+cmp.setup({
+  snippet = {
+    expand = function(args)
+      require('luasnip').lsp_expand(args.body)
+    end,
+  },
+  window = {
+    completion = cmp.config.window.bordered(),
+    documentation = cmp.config.window.bordered(),
+  },
+  mapping = cmp.mapping.preset.insert({
+    ['<c-b>'] = cmp.mapping.scroll_docs(-4),
+    ['<c-f>'] = cmp.mapping.scroll_docs(4),
+    ['<c-e>'] = cmp.mapping.abort(),
+    ['<cr>'] = cmp.mapping.confirm({ select = false }), -- accept currently selected item. set `select` to `false` to only confirm explicitly selected items.
+     ["<Tab>"] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      elseif luasnip.expand_or_jumpable() then
+        luasnip.expand_or_jump()
+      elseif has_words_before() then
+        cmp.complete()
+      else
+        fallback()
+      end
+    end, { "i", "s" }),
 
-        return kind
-      end,
-    },
-    window = {
-      -- completion = cmp.config.window.bordered(),
-      documentation = cmp.config.window.bordered(),
-      completion = {
-        --[[ winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,Search:None", ]]
-        col_offset = -3,
-        side_padding = 0,
-      },
-    },
+    ["<S-Tab>"] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item()
+      elseif luasnip.jumpable(-1) then
+        luasnip.jump(-1)
+      else
+        fallback()
+      end
+    end, { "i", "s" }),
+  }),
+  sources = cmp.config.sources({
+    { name = 'nvim_lsp' },
+    { name = 'luasnip' },
+  }, {
+    { name = 'buffer' },
+  }),
+  formatting = {
+    format = lspkind.cmp_format()
   }
-)
+})
 
--- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
-cmp.setup.cmdline(
-  "/",
-  {
-    sources = {
-      { name = "buffer" }
-    }
-  }
-)
+-- set configuration for specific filetype.
+cmp.setup.filetype('gitcommit', {
+  sources = cmp.config.sources({
+    { name = 'cmp_git' }, -- you can specify the `cmp_git` source if you were installed it.
+  }, {
+    { name = 'buffer' },
+  })
+})
 
--- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
-cmp.setup.cmdline(
-  ":",
-  {
-    sources = cmp.config.sources(
-      {
-        { name = "path" }
-      },
-      {
-        { name = "cmdline" }
-      }
-    )
+-- use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
+cmp.setup.cmdline({ '/', '?' }, {
+  mapping = cmp.mapping.preset.cmdline(),
+  sources = {
+    { name = 'buffer' }
   }
-)
+})
+
+-- use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+cmp.setup.cmdline(':', {
+  mapping = cmp.mapping.preset.cmdline(),
+  sources = cmp.config.sources({
+    { name = 'path' }
+  }, {
+    { name = 'cmdline' }
+  })
+})
+
 
 -- lspconfig.
 local lspconfig = require "lspconfig"
 require("mason").setup()
 require("mason-lspconfig").setup({
   ensure_installed = { 'tsserver', 'tailwindcss', 'volar', 'sqlls', 'pyright', 'intelephense', 'marksman', 'eslint',
-    'cssls', 'html', 'yamlls', 'jsonls', 'quick_lint_js' },
+    'cssls', 'html', 'yamlls', 'jsonls', 'quick_lint_js', 'sumneko_lua' },
   automatic_installation = true
 })
 
 local capabilities = require("cmp_nvim_lsp").update_capabilities(vim.lsp.protocol.make_client_capabilities())
--- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
---[[ local lsp_installer = require("nvim-lsp-installer") ]]
-
 local on_attach = function(client, bufnr)
   local function buf_set_keymap(...)
     vim.api.nvim_buf_set_keymap(bufnr, ...)
@@ -216,42 +168,33 @@ local on_attach = function(client, bufnr)
 
   local opts = { noremap = true, silent = true }
 
+  if client.name == 'eslint' then
+    vim.cmd('autocmd BufWritePre *.tsx,*.ts,*.jsx,*.js,*.json EslintFixAll')
+  end
 
-  buf_set_keymap("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", opts)
-  buf_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
-  --[[ buf_set_keymap("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", opts) ]]
-  buf_set_keymap("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", opts)
-  -- buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-  -- buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
-  -- buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
-  -- buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
-  -- buf_set_keymap("n", "<space>D", "<cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
-  buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-  --[[ buf_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts) ]]
-  -- buf_set_keymap("n", "<leader>e", "<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>", opts)
-  --[[ buf_set_keymap("n", "g[", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", opts) ]]
-  --[[ buf_set_keymap("n", "g]", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", opts) ]]
-  -- buf_set_keymap("n", "<leader>fd", "<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
-  buf_set_keymap("n", "<leader>ef", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-  buf_set_keymap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", opts)
+  buf_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.declaration()<cr>", opts)
+  buf_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<cr>", opts)
+  buf_set_keymap("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<cr>", opts)
+  buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
+  buf_set_keymap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<cr>", opts)
 
   -- illuminate integrated with lsp
   require 'illuminate'.on_attach(client)
 
-  if client.server_capabilities.documentHighlightProvider then
+  if client.server_capabilities.documenthighlightprovider then
     vim.api.nvim_create_augroup("lsp_document_highlight", { clear = true })
     vim.api.nvim_clear_autocmds { buffer = bufnr, group = "lsp_document_highlight" }
-    vim.api.nvim_create_autocmd("CursorHold", {
+    vim.api.nvim_create_autocmd("cursorhold", {
       callback = vim.lsp.buf.document_highlight,
       buffer = bufnr,
       group = "lsp_document_highlight",
-      desc = "Document Highlight",
+      desc = "document highlight",
     })
-    vim.api.nvim_create_autocmd("CursorMoved", {
+    vim.api.nvim_create_autocmd("cursormoved", {
       callback = vim.lsp.buf.clear_references,
       buffer = bufnr,
       group = "lsp_document_highlight",
-      desc = "Clear All the References",
+      desc = "clear all the references",
     })
   end
 end
@@ -265,34 +208,33 @@ require("mason-lspconfig").setup_handlers({
 
     if server_name == 'tsserver' or server_name == 'tailwindcss' then
       opts.root_dir = function(fname)
-        return lspconfig.util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git")(fname) or
+        return lspconfig.util.root_pattern(".git", "package.json", "tsconfig.json", "jsconfig.json")(fname) or
             vim.fn.getcwd()
       end
       opts.single_file_support = true
     elseif server_name == 'eslint' then
-      vim.cmd('autocmd BufWritePre *.tsx,*.ts,*.jsx,*.js EslintFixAll')
       opts.single_file_support = true
     elseif server_name == "sumneko_lua" then
       local runtime_path = vim.split(package.path, ";")
       table.insert(runtime_path, "lua/?.lua")
       table.insert(runtime_path, "lua/?/init.lua")
       opts.settings = {
-        Lua = {
+        lua = {
           runtime = {
-            -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
-            version = "LuaJIT",
-            -- Setup your lua path
+            -- tell the language server which version of lua you're using (most likely luajit in the case of neovim)
+            version = "luajit",
+            -- setup your lua path
             path = runtime_path
           },
           diagnostics = {
-            -- Get the language server to recognize the `vim` global
+            -- get the language server to recognize the `vim` global
             globals = { "vim" }
           },
           workspace = {
-            -- Make the server aware of Neovim runtime files
+            -- make the server aware of neovim runtime files
             library = vim.api.nvim_get_runtime_file("", true)
           },
-          -- Do not send telemetry data containing a randomized but unique identifier
+          -- do not send telemetry data containing a randomized but unique identifier
           telemetry = {
             enable = false
           }
@@ -319,10 +261,10 @@ require "nvim-treesitter.configs".setup {
   incremental_selection = {
     enable = true,
     keymaps = {
-      init_selection = "<CR>",
-      node_incremental = "<CR>",
-      node_decremental = "<BS>",
-      scope_incremental = "<TAB>"
+      init_selection = "<M-v>",
+      node_incremental = "<M-v>",
+      node_decremental = "<M-c>",
+      --[[ scope_incremental = "<tab>" ]]
     }
   },
   indent = {
@@ -349,19 +291,19 @@ require "nvim-treesitter.configs".setup {
 require "treesitter-context".setup {}
 
 -- comment
-require("Comment").setup {
+require("comment").setup {
   pre_hook = function(ctx)
-    local U = require "Comment.utils"
+    local u = require "comment.utils"
 
     local location = nil
-    if ctx.ctype == U.ctype.block then
+    if ctx.ctype == u.ctype.block then
       location = require("ts_context_commentstring.utils").get_cursor_location()
-    elseif ctx.cmotion == U.cmotion.v or ctx.cmotion == U.cmotion.V then
+    elseif ctx.cmotion == u.cmotion.v or ctx.cmotion == u.cmotion.v then
       location = require("ts_context_commentstring.utils").get_visual_start_location()
     end
 
     return require("ts_context_commentstring.internal").calculate_commentstring {
-      key = ctx.ctype == U.ctype.line and "__default" or "__multiline",
+      key = ctx.ctype == u.ctype.line and "__default" or "__multiline",
       location = location
     }
   end
@@ -369,10 +311,10 @@ require("Comment").setup {
 
 -- autopairs
 require("nvim-autopairs").setup {}
--- If you want insert `(` after select function or method item
+-- if you want insert `(` after select function or method item
 local cmp_autopairs = require("nvim-autopairs.completion.cmp")
 cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done({ map_char = { tex = "" } }))
--- add a lisp filetype (wrap my-function), FYI: Hardcoded = { "clojure", "clojurescript", "fennel", "janet" }
+-- add a lisp filetype (wrap my-function), fyi: hardcoded = { "clojure", "clojurescript", "fennel", "janet" }
 -- cmp_autopairs.lisp[#cmp_autopairs.lisp + 1] = "racket"
 
 -- nvim-gps
@@ -380,7 +322,7 @@ local gps = require "nvim-gps"
 gps.setup()
 
 -- lualine
-local function tabStopStatus()
+local function tabstopstatus()
   return " " .. vim.api.nvim_get_option("tabstop")
 end
 
@@ -400,9 +342,9 @@ require("lualine").setup {
         "filename",
         path = 1,
         symbols = {
-          modified = "*", -- Text to show when the file is modified.
-          readonly = " ", -- Text to show when the file is non-modifiable or readonly.
-          unnamed = "[Untitled]" -- Text to show for unnamed buffers.
+          modified = "*", -- text to show when the file is modified.
+          readonly = " ", -- text to show when the file is non-modifiable or readonly.
+          unnamed = "[untitled]" -- text to show for unnamed buffers.
         }
       },
       "branch",
@@ -410,7 +352,7 @@ require("lualine").setup {
     },
     lualine_c = { { gps.get_location, cond = gps.is_available } },
     lualine_x = {},
-    lualine_y = { "filetype", "fileformat", tabStopStatus, "diagnostics" },
+    lualine_y = { "filetype", "fileformat", tabstopstatus, "diagnostics" },
     lualine_z = {
       { "progress", separator = { right = "" }, left_padding = 2 }
     }
@@ -455,7 +397,7 @@ require('gitsigns').setup()
 require("scrollbar").setup()
 
 -- dim unused
-require('dim').setup({})
+--[[ require('dim').setup({}) ]]
 
 -- dim window
 --[[ require'shade'.setup({ ]]
@@ -472,7 +414,7 @@ require('dim').setup({})
 require("lspsaga").init_lsp_saga({
   rename_in_select = false,
   finder_action_keys = {
-    open = "<CR>",
+    open = "<cr>",
     vsplit = "s",
     split = "i",
     tabe = "t",
@@ -480,20 +422,26 @@ require("lspsaga").init_lsp_saga({
   },
   code_action_keys = {
     quit = "q",
-    exec = "<CR>",
+    exec = "<cr>",
   },
   definition_action_keys = {
-    edit = '<CR>',
-    vsplit = '<C-v>',
-    split = '<C-x>',
-    tabe = '<C-t>',
+    edit = '<cr>',
+    vsplit = '<c-v>',
+    split = '<c-x>',
+    tabe = '<c-t>',
     quit = 'q',
   },
 })
 
 -- ufo
-require("ufo").setup {
-  provider_selector = function(bufnr, filetype)
-    return { "treesitter", "indent" }
-  end,
-}
+--[[ require("ufo").setup { ]]
+--[[   provider_selector = function(bufnr, filetype) ]]
+--[[     return { "treesitter", "indent" } ]]
+--[[   end, ]]
+--[[ } ]]
+
+-- fidget
+require'fidget'.setup{}
+
+-- dim other functions
+require('twilight').setup{}

@@ -53,6 +53,31 @@ end
 -- if you only want these mappings for toggle term use term://*toggleterm#* instead
 vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
 
+-- lsp
+local hasEslint = function()
+  local clients = vim.lsp.get_active_clients()
+  local result = false
+
+  for _, x in pairs(clients) do
+    if x['name'] == 'eslint' then
+      result = true
+    end
+  end
+
+  return result
+end
+
+function _G.my_format()
+
+  if hasEslint() then
+    vim.cmd 'EslintFixAll'
+  else
+    vim.lsp.buf.format({ async = true })
+  end
+end
+
+map {'n', '<leader>ef', '<cmd>lua my_format()<cr>'}
+
 -- telescope
 map { "n", "<leader>ff", "<cmd>Telescope find_files<cr>" }
 map { "n", "<leader>fg", "<cmd>Telescope live_grep<cr>" }
@@ -60,11 +85,11 @@ map { "n", "<leader>fb", "<cmd>Telescope buffers<cr>" }
 map { "n", "<leader>fh", "<cmd>Telescope oldfiles<cr>" }
 map { "n", "<leader>fH", "<cmd>Telescope help_tags<cr>" }
 map { "n", "<leader>fs", "<cmd>Telescope lsp_document_symbols<cr>" }
-map { "n", "<leader>fS", "<cmd>Telescope lsp_workspace_symbols<cr>" }
+map { "n", "<leader>fS", "<cmd>Telescope lsp_dynamic_workspace_symbols<cr>" }
 map { "n", "<leader>fF", "<cmd>lua require 'telescope'.extensions.file_browser.file_browser()<CR>" }
 map { "n", "<leader>fd", "<cmd>Telescope diagnostics<cr>" }
-
--- lsp
+map { "n", "<leader>fp", "<cmd>Telescope projects<cr>" }
+map { "n", "<leader>/", "<cmd>Telescope current_buffer_fuzzy_find<cr>" }
 
 -- edit
 map { "n", "<leader>ei", "gg=G<c-o>" }
@@ -78,11 +103,8 @@ map { "n", "<leader>dt", ":DiffviewToggleFiles<CR>" }
 -- nvim-tree
 map { "n", "<C-e>", ":NvimTreeFindFileToggle<CR>" }
 
--- SymbolsOutline
--- map {"n", "<leader>so", "<cmd>SymbolsOutline<cr>"}
-
 -- hop
-map { "n", "<leader>s", "<cmd>HopChar2<cr>" }
+map { "n", "s", "<cmd>HopChar1<cr>" }
 -- place this in one of your configuration file(s)
 map { "", "f",
   "<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.AFTER_CURSOR, current_line_only = true })<cr>" }
