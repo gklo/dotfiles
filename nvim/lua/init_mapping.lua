@@ -42,11 +42,6 @@ map { "t", "<c-a>", '<Cmd>exe v:count1 . "ToggleTerm"<CR>' }
 function _G.set_terminal_keymaps()
   local opts = { buffer = 0 }
   vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
-  vim.keymap.set('t', 'jk', [[<C-\><C-n>]], opts)
-  vim.keymap.set('t', '<C-h>', [[<Cmd>wincmd h<CR>]], opts)
-  vim.keymap.set('t', '<C-j>', [[<Cmd>wincmd j<CR>]], opts)
-  vim.keymap.set('t', '<C-k>', [[<Cmd>wincmd k<CR>]], opts)
-  vim.keymap.set('t', '<C-l>', [[<Cmd>wincmd l<CR>]], opts)
   vim.keymap.set('t', '<C-w><c-w>', [[<C-\><C-n><c-w>w]], opts)
 end
 
@@ -106,14 +101,30 @@ map { "n", "<C-e>", ":NvimTreeFindFileToggle<CR>" }
 -- hop
 map { "n", "s", "<cmd>HopChar1<cr>" }
 -- place this in one of your configuration file(s)
-map { "", "f",
+map { "n", "f",
   "<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.AFTER_CURSOR, current_line_only = true })<cr>" }
-map { "", "F",
+map { "n", "F",
   "<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.BEFORE_CURSOR, current_line_only = true })<cr>" }
-map { "", "t",
+map { "n", "t",
   "<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.AFTER_CURSOR, current_line_only = true,  hint_offset = -1 })<cr>" }
-map { "", "T",
+map { "n", "T",
   "<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.BEFORE_CURSOR, current_line_only = true, hint_offset = 1 })<cr>" }
+map { "x", "f",
+"<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.AFTER_CURSOR, current_line_only = true })<cr>" }
+map { "x", "F",
+"<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.BEFORE_CURSOR, current_line_only = true })<cr>" }
+map { "x", "t",
+"<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.AFTER_CURSOR, current_line_only = true,  hint_offset = -1 })<cr>" }
+map { "x", "T",
+"<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.BEFORE_CURSOR, current_line_only = true, hint_offset = 1 })<cr>" }
+map { "o", "f",
+"<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.AFTER_CURSOR, current_line_only = true })<cr>" }
+map { "o", "F",
+"<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.BEFORE_CURSOR, current_line_only = true })<cr>" }
+map { "o", "t",
+"<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.AFTER_CURSOR, current_line_only = true,  hint_offset = -1 })<cr>" }
+map { "o", "T",
+"<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.BEFORE_CURSOR, current_line_only = true, hint_offset = 1 })<cr>" }
 
 -- lspsaga
 map { "n", "gr", "<cmd>Lspsaga lsp_finder<CR>", { slient = true } }

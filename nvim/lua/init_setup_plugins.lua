@@ -37,11 +37,6 @@ telescope.setup {
   },
 }
 
--- symbols
-vim.g.symbols_outline = {
-  width = 80
-}
-
 -- nvim tree
 require "nvim-tree".setup {
   disable_netrw       = false,
@@ -101,10 +96,11 @@ cmp.setup({
     ['<c-b>'] = cmp.mapping.scroll_docs(-4),
     ['<c-f>'] = cmp.mapping.scroll_docs(4),
     ['<c-e>'] = cmp.mapping.abort(),
-    ['<cr>'] = cmp.mapping.confirm({ select = false }), -- accept currently selected item. set `select` to `false` to only confirm explicitly selected items.
-     ["<Tab>"] = cmp.mapping(function(fallback)
+    ['<cr>'] = cmp.mapping.confirm({ select = true }), -- accept currently selected item. set `select` to `false` to only confirm explicitly selected items.
+    ["<Tab>"] = cmp.mapping(function(fallback)
       if cmp.visible() then
-        cmp.select_next_item()
+        --[[ cmp.select_next_item() ]]
+        cmp.confirm({ select = true })
       elseif luasnip.expand_or_jumpable() then
         luasnip.expand_or_jump()
       elseif has_words_before() then
@@ -215,7 +211,10 @@ require("mason-lspconfig").setup_handlers({
   function(server_name) -- default handler (optional)
     local opts = {
       on_attach = on_attach,
-      capabilities = capabilities
+      capabilities = capabilities,
+      flags = {
+        debounce_text_changes = 500
+      }
     }
 
     if server_name == 'tsserver' or server_name == 'tailwindcss' then
