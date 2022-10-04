@@ -1,3 +1,4 @@
+.DS_Store
 addsubmodules.sh
 *.log
 *.bak
@@ -8,3 +9,4 @@ hosts/hosts.original
 vim/.netrwhist
 vim/undo/**
 !vim/undo/.gitkeep
+packer_compiled.lua
