@@ -101,7 +101,8 @@ map {'n', '<tab>', ':cn<cr>'}
 map {'n', '<s-tab>', ':cp<cr>'}
 
 -- lspsaga
-map { "n", "gr", "<cmd>Lspsaga lsp_finder<CR>", { slient = true } }
+-- map { "n", "gr", "<cmd>Lspsaga lsp_finder<CR>", { slient = true } }
+map { "n", "gr", "<cmd>Telescope lsp_references<CR>", { slient = true } }
 map { "n", "gh", "<cmd>Lspsaga show_line_diagnostics<CR>", { slient = true } }
 map { "n", "g[", "<cmd>Lspsaga diagnostic_jump_prev<CR>", { slient = true } }
 map { "n", "g]", "<cmd>Lspsaga diagnostic_jump_next<CR>", { slient = true } }

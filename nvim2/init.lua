@@ -95,8 +95,7 @@ vim.cmd('autocmd TermOpen * setlocal nonumber norelativenumber')
 
 -- config lsp diagnostic
 vim.diagnostic.config({
-  virtual_text = true,
-  underline = {
+  virtual_text = {
     -- Do not underline text when severity is low (INFO or HINT).
     severity = { min = vim.diagnostic.severity.WARN },
   },
@@ -137,7 +136,7 @@ require('packer').startup(function(use)
     {
       'notjedi/nvim-rooter.lua',
       config = function() require 'nvim-rooter'.setup({
-          rooter_patterns = { '.git', '.hg', '.svn', 'package.json', 'Makefile', 'init.lua' },
+          rooter_patterns = { '.git', '.hg', '.svn', 'init.lua' },
           trigger_patterns = { '*' },
         })
       end
@@ -392,6 +391,7 @@ require('packer').startup(function(use)
     end },
     'saadparwaiz1/cmp_luasnip',
     'rafamadriz/friendly-snippets',
+    'johngrib/vim-game-code-break'
   }
 end)
 
