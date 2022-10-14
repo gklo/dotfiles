@@ -115,13 +115,15 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+-- search
+vim.o.incsearch = false
 
 -- 0.8 features
 vim.o.winbar = '%f'
 vim.o.laststatus = 3
 
 -- commands
-vim.api.nvim_create_user_command('Reload', function ()
+vim.api.nvim_create_user_command('Reload', function()
   vim.cmd('source ' .. vim.fn.expand('$MYVIMRC'))
   vim.cmd('PackerCompile')
 end, {})
@@ -145,8 +147,8 @@ require('packer').startup(function(use)
     -- colorscheme
     {
       'folke/tokyonight.nvim',
-      config = function ()
-        vim.cmd[[colorscheme tokyonight]]
+      config = function()
+        vim.cmd [[colorscheme tokyonight]]
       end
     },
 
@@ -202,7 +204,7 @@ require('packer').startup(function(use)
       }
     end },
 
-      -- lsp
+    -- lsp
     { "williamboman/mason.nvim", config = function() require('mason').setup() end },
     { "williamboman/mason-lspconfig.nvim", config = function()
       local lspconfig = require 'lspconfig'
@@ -254,9 +256,9 @@ require('packer').startup(function(use)
             on_attach = on_attach,
             capabilities = capabilities,
             single_file_support = true,
-            flags = {
-              debounce_text_changes = 500
-            }
+            -- flags = {
+            --   debounce_text_changes = 2000
+            -- }
           }
 
           if server_name == 'tsserver' or server_name == 'tailwindcss' then
@@ -391,7 +393,19 @@ require('packer').startup(function(use)
     end },
     'saadparwaiz1/cmp_luasnip',
     'rafamadriz/friendly-snippets',
-    'johngrib/vim-game-code-break'
+    'johngrib/vim-game-code-break',
+    { 'yamatsum/nvim-cursorline', config = function()
+      require('nvim-cursorline').setup {
+        cursorline = {
+          timeout = 300,
+        },
+      }
+    end },
+    -- {
+    --   "windwp/nvim-autopairs",
+    --   config = function() require("nvim-autopairs").setup {} end
+    -- },
+    'm4xshen/autoclose.nvim'
   }
 end)
 
