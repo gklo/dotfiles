@@ -401,11 +401,6 @@ require('packer').startup(function(use)
         },
       }
     end },
-    -- {
-    --   "windwp/nvim-autopairs",
-    --   config = function() require("nvim-autopairs").setup {} end
-    -- },
-    'm4xshen/autoclose.nvim'
   }
 end)
 
