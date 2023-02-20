@@ -6,7 +6,7 @@ vim.o.writebackup = false
 vim.o.termguicolors = true
 
 vim.o.background = "dark"
---vim.o.guifont = "JetbrainsMono Nerd Font:h10"
+vim.o.guifont = "SFMono Nerd Font:h11"
 
 -- vim.o.cursorline = true
 vim.o.signcolumn = "yes"
@@ -148,7 +148,7 @@ require('packer').startup(function(use)
     {
       'folke/tokyonight.nvim',
       config = function()
-        vim.cmd [[colorscheme tokyonight]]
+        vim.cmd [[colorscheme tokyonight-moon]]
       end
     },
 
@@ -228,6 +228,7 @@ require('packer').startup(function(use)
         buf_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.declaration()<cr>", opts)
         buf_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<cr>", opts)
         buf_set_keymap("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<cr>", opts)
+        buf_set_keymap("n", "gh", "<cmd>lua vim.diagnostic.open_float()<cr>", opts)
         buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
         buf_set_keymap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<cr>", opts)
 
@@ -249,7 +250,7 @@ require('packer').startup(function(use)
         end
       end
 
-      local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+      local capabilities = require('cmp_nvim_lsp').default_capabilities()
       require("mason-lspconfig").setup_handlers({
         function(server_name) -- default handler (optional)
           local opts = {
@@ -296,10 +297,13 @@ require('packer').startup(function(use)
           require("lspconfig")[server_name].setup(opts)
         end
       })
+
+
+      -- disable insert update
+      -- vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics,{ update_in_insert = false })
     end },
     "neovim/nvim-lspconfig",
-    'glepnir/lspsaga.nvim',
-
+    "glepnir/lspsaga.nvim",
     -- nvim cmp
     'hrsh7th/cmp-nvim-lsp',
     'hrsh7th/cmp-buffer',
@@ -392,7 +396,7 @@ require('packer').startup(function(use)
       require("luasnip.loaders.from_vscode").lazy_load()
     end },
     'saadparwaiz1/cmp_luasnip',
-    'rafamadriz/friendly-snippets',
+    -- 'rafamadriz/friendly-snippets',
     'johngrib/vim-game-code-break',
     { 'yamatsum/nvim-cursorline', config = function()
       require('nvim-cursorline').setup {
@@ -401,6 +405,14 @@ require('packer').startup(function(use)
         },
       }
     end },
+    {
+      "windwp/nvim-autopairs",
+      config = function() require("nvim-autopairs").setup {} end
+    },
+    {
+      'windwp/nvim-ts-autotag',
+      config = function () require('nvim-ts-autotag').setup {} end
+    },
   }
 end)
 
