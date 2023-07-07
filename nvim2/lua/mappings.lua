@@ -97,18 +97,14 @@ map { "n", "<leader>df", ":DiffviewFileHistory %<CR>" }
 map { "n", "<leader>dt", ":DiffviewToggleFiles<CR>" }
 
 -- nvim-tree
--- map { "n", "<C-e>", ":NvimTreeFindFileToggle<CR>" }
+map { "n", "<C-e>", ":NvimTreeFindFileToggle<CR>" }
 
 -- diagnostics
 map { 'n', '<tab>', ':cn<cr>' }
 map { 'n', '<s-tab>', ':cp<cr>' }
 
--- lspsaga
--- map { "n", "gr", "<cmd>Lspsaga lsp_finder<CR>", { slient = true } }
+-- lsp
 map { "n", "gr", "<cmd>Telescope lsp_references<CR>", { slient = true } }
--- map { "n", "gh", "<cmd>Lspsaga show_line_diagnostics<CR>", { slient = true } }
-map { "n", "g[", "<cmd>Lspsaga diagnostic_jump_prev<CR>", { slient = true } }
-map { "n", "g]", "<cmd>Lspsaga diagnostic_jump_next<CR>", { slient = true } }
-map { "n", "gp", "<cmd>Lspsaga peek_definition<CR>", { silent = true } }
-map { "n", "ga", "<cmd>Lspsaga code_action<CR>", { silent = true } }
 map { "n", "gv", "<cmd>vsplit<CR><cmd>lua vim.lsp.buf.definition()<cr>", { silent = true } }
+map { "n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<cr>", { silent = true } }
+map { "n", "H", "<cmd>lua vim.diagnostic.open_float()<cr>", { silent = true } }
