@@ -100,8 +100,8 @@ map { "n", "<leader>dt", ":DiffviewToggleFiles<CR>" }
 map { "n", "<C-e>", ":NvimTreeFindFileToggle<CR>" }
 
 -- diagnostics
-map { 'n', '<tab>', ':cn<cr>' }
-map { 'n', '<s-tab>', ':cp<cr>' }
+-- map { 'n', '<tab>', ':cn<cr>' }
+-- map { 'n', '<s-tab>', ':cp<cr>' }
 
 -- lsp
 map { "n", "gr", "<cmd>Telescope lsp_references<CR>", { slient = true } }

@@ -122,6 +122,7 @@ vim.o.incsearch = false
 vim.o.winbar = '%f'
 vim.o.laststatus = 3
 
+
 -- commands
 vim.api.nvim_create_user_command('Reload', function()
   vim.cmd('source ' .. vim.fn.expand('$MYVIMRC'))
@@ -369,6 +370,7 @@ require('packer').startup(function(use)
         end, { "i", "s" }),
       }),
       sources = cmp.config.sources({
+        { name = "copilot", group_index = 1 },
         { name = 'nvim_lsp' },
         { name = 'luasnip' }, -- For luasnip users.
       }, {
@@ -403,7 +405,7 @@ require('packer').startup(function(use)
       })
     })
   end },
-  { 'L3MON4D3/LuaSnip', config = function()
+  { 'L3MON4D3/LuaSnip', requires = { 'rafamadriz/friendly-snippets' }, config = function()
     require("luasnip.loaders.from_vscode").lazy_load()
   end },
   'saadparwaiz1/cmp_luasnip',
@@ -451,6 +453,28 @@ require('packer').startup(function(use)
     "https://git.sr.ht/~nedia/auto-save.nvim",
     config = function()
       require("auto-save").setup()
+    end
+  },
+  -- {
+  --   'github/copilot.vim',
+  --   config = function()
+  --     vim.keymap.set("i", "<C-c>", "copilot#Accept('')", {expr=true, silent=true})
+  --   end
+  -- },
+  {
+    'zbirenbaum/copilot.lua',
+    config = function()
+      require("copilot").setup({
+        suggestion = { enabled = false },
+        panel = { enabled = false },
+      })
+    end
+  },
+  {
+    "zbirenbaum/copilot-cmp",
+    after = { "copilot.lua" },
+    config = function ()
+      require("copilot_cmp").setup()
     end
   }
 }

@@ -1,0 +1,15 @@
+*.jpg
+*.png
+*.jpeg
+*.gif
+*.mp4
+*.woff2
+*.ttf
+*.svg
+&
+.git
+.github
+*.min.js
+*.min.css
+!.env
+!.env.*
