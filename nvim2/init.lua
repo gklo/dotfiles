@@ -122,18 +122,21 @@ vim.o.incsearch = false
 vim.o.winbar = '%f'
 vim.o.laststatus = 3
 
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable", -- latest stable release
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
 
--- commands
-vim.api.nvim_create_user_command('Reload', function()
-  vim.cmd('source ' .. vim.fn.expand('$MYVIMRC'))
-  vim.cmd('PackerCompile')
-end, {})
-
--- packer
-require('packer').startup(function(use)
-  use {
-    'wbthomason/packer.nvim',
-    -- fundamental
+-- lazy
+require('lazy').setup({
     'tpope/vim-repeat',
     'machakann/vim-sandwich',
     {
@@ -150,6 +153,7 @@ require('packer').startup(function(use)
     'folke/tokyonight.nvim',
     config = function()
       vim.cmd [[colorscheme tokyonight-moon]]
+      vim.cmd [[highlight WinSeparator guifg=grey]]
     end
   },
 
@@ -176,7 +180,7 @@ require('packer').startup(function(use)
   -- telescope
   {
     'nvim-telescope/telescope.nvim',
-    requires = { { 'nvim-lua/plenary.nvim' } },
+    dependencies = { { 'nvim-lua/plenary.nvim' } },
     config = function()
       require('telescope').setup({
         defaults = {
@@ -192,7 +196,7 @@ require('packer').startup(function(use)
     end
   },
   -- treesitter
-  { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate', config = function()
+  { 'nvim-treesitter/nvim-treesitter', build = ':TSUpdate', config = function()
     require 'nvim-treesitter.configs'.setup {
       auto_install = true,
       highlight = {
@@ -200,7 +204,7 @@ require('packer').startup(function(use)
       }
     }
   end },
-  { 'JoosepAlviste/nvim-ts-context-commentstring', requires = { 'tpope/vim-commentary' }, config = function()
+  { 'JoosepAlviste/nvim-ts-context-commentstring', dependencies = { 'tpope/vim-commentary' }, config = function()
     require 'nvim-treesitter.configs'.setup {
       context_commentstring = {
         enable = true
@@ -210,7 +214,7 @@ require('packer').startup(function(use)
 
   -- lsp
   { "williamboman/mason.nvim" },
-  { "williamboman/mason-lspconfig.nvim", requires = { 'williamboman/mason.nvim' }, config = function()
+  { "williamboman/mason-lspconfig.nvim", dependencies = { 'williamboman/mason.nvim' }, config = function()
     require('mason').setup() 
     local lspconfig = require 'lspconfig'
     require("mason-lspconfig").setup({
@@ -315,13 +319,13 @@ require('packer').startup(function(use)
     -- vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics,{ update_in_insert = false })
   end },
   "neovim/nvim-lspconfig",
-  "glepnir/lspsaga.nvim",
+  -- "glepnir/lspsaga.nvim",
   -- nvim cmp
-  'hrsh7th/cmp-nvim-lsp',
-  'hrsh7th/cmp-buffer',
-  'hrsh7th/cmp-path',
-  'hrsh7th/cmp-cmdline',
-  { 'hrsh7th/nvim-cmp', config = function()
+  -- 'hrsh7th/cmp-nvim-lsp',
+  -- 'hrsh7th/cmp-buffer',
+  -- 'hrsh7th/cmp-path',
+  -- 'hrsh7th/cmp-cmdline',
+  { 'hrsh7th/nvim-cmp', dependencies = { 'hrsh7th/cmp-nvim-lsp', 'hrsh7th/cmp-buffer', 'hrsh7th/cmp-path', 'hrsh7th/cmp-cmdline' }, config = function()
     local cmp = require 'cmp'
     local luasnip = require 'luasnip'
     if cmp == nil then return end
@@ -405,7 +409,7 @@ require('packer').startup(function(use)
       })
     })
   end },
-  { 'L3MON4D3/LuaSnip', requires = { 'rafamadriz/friendly-snippets' }, config = function()
+  { 'L3MON4D3/LuaSnip', dependencies = { 'rafamadriz/friendly-snippets' }, config = function()
     require("luasnip.loaders.from_vscode").lazy_load()
   end },
   'saadparwaiz1/cmp_luasnip',
@@ -424,10 +428,12 @@ require('packer').startup(function(use)
   },
   {
     'windwp/nvim-ts-autotag',
-    config = function () require('nvim-ts-autotag').setup {} end
+    config = function () require('nvim-ts-autotag').setup {
+      enable_rename = false,
+    } end
   },
   { 'nvim-tree/nvim-tree.lua',
-    requires = {
+    dependencies = {
       'nvim-tree/nvim-web-devicons', -- optional
     },
     config = function()
@@ -476,9 +482,22 @@ require('packer').startup(function(use)
     config = function ()
       require("copilot_cmp").setup()
     end
+  },
+  {
+    "folke/flash.nvim",
+    event = "VeryLazy",
+    ---@type Flash.Config
+    opts = {},
+    -- stylua: ignore
+    keys = {
+      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+      { "S", mode = { "n", "o", "x" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+      { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
+      { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+      { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
+    },
   }
-}
-end)
+})
 
 -- commands
 require('mappings')
