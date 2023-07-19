@@ -349,7 +349,7 @@ require('lazy').setup({
         ['<C-b>'] = cmp.mapping.scroll_docs(-4),
         ['<C-f>'] = cmp.mapping.scroll_docs(4),
         ['<C-e>'] = cmp.mapping.abort(),
-        ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+        ['<CR>'] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
         ["<Tab>"] = cmp.mapping(function(fallback)
           if cmp.visible() then
             --[[ cmp.select_next_item() ]]
@@ -409,7 +409,7 @@ require('lazy').setup({
       })
     })
   end },
-  { 'L3MON4D3/LuaSnip', dependencies = { 'rafamadriz/friendly-snippets' }, config = function()
+  { 'L3MON4D3/LuaSnip', config = function()
     require("luasnip.loaders.from_vscode").lazy_load()
   end },
   'saadparwaiz1/cmp_luasnip',

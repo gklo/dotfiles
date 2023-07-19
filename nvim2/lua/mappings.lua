@@ -31,8 +31,9 @@ map { "n", "<leader>p", 'o<esc>"+]p' }
 map { "n", "<leader>P", 'O<esc>"+]P' }
 -- indented paste
 -- map { "n", "p", "]p" }
+-- map {'n', 'p', '"0p'}
 
-map { "n", "<leader>w", "<cmd>:w<cr>" }
+map {'n','gw', '<c-w>w'}
 
 -- custom command
 vim.cmd "command -nargs=1 -bar STab :set shiftwidth=<args> tabstop=<args> softtabstop=<args>"
