@@ -213,7 +213,6 @@ require('lazy').setup({
   end },
 
   -- lsp
-  { "williamboman/mason.nvim" },
   { "williamboman/mason-lspconfig.nvim", dependencies = { 'williamboman/mason.nvim' }, config = function()
     require('mason').setup() 
     local lspconfig = require 'lspconfig'
@@ -313,18 +312,8 @@ require('lazy').setup({
         require("lspconfig")[server_name].setup(opts)
       end
     })
-
-
-    -- disable insert update
-    -- vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics,{ update_in_insert = false })
   end },
   "neovim/nvim-lspconfig",
-  -- "glepnir/lspsaga.nvim",
-  -- nvim cmp
-  -- 'hrsh7th/cmp-nvim-lsp',
-  -- 'hrsh7th/cmp-buffer',
-  -- 'hrsh7th/cmp-path',
-  -- 'hrsh7th/cmp-cmdline',
   { 'hrsh7th/nvim-cmp', dependencies = { 'hrsh7th/cmp-nvim-lsp', 'hrsh7th/cmp-buffer', 'hrsh7th/cmp-path', 'hrsh7th/cmp-cmdline' }, config = function()
     local cmp = require 'cmp'
     local luasnip = require 'luasnip'
@@ -413,7 +402,6 @@ require('lazy').setup({
     require("luasnip.loaders.from_vscode").lazy_load()
   end },
   'saadparwaiz1/cmp_luasnip',
-  -- 'rafamadriz/friendly-snippets',
   'johngrib/vim-game-code-break',
   { 'yamatsum/nvim-cursorline', config = function()
     require('nvim-cursorline').setup {
@@ -430,6 +418,7 @@ require('lazy').setup({
     'windwp/nvim-ts-autotag',
     config = function () require('nvim-ts-autotag').setup {
       enable_rename = false,
+      enable_close_on_slash = false,
     } end
   },
   { 'nvim-tree/nvim-tree.lua',
@@ -483,19 +472,28 @@ require('lazy').setup({
       require("copilot_cmp").setup()
     end
   },
+  --{
+  --  "folke/flash.nvim",
+  --  event = "VeryLazy",
+  --  ---@type Flash.Config
+  --  opts = {},
+  --  -- stylua: ignore
+  --  keys = {
+  --    { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+  --    { "S", mode = { "n", "o", "x" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+  --    { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
+  --    { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+  --    { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
+  --  },
+  --},
   {
-    "folke/flash.nvim",
-    event = "VeryLazy",
-    ---@type Flash.Config
-    opts = {},
-    -- stylua: ignore
-    keys = {
-      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
-      { "S", mode = { "n", "o", "x" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
-      { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
-      { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
-      { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
-    },
+    'rmagatti/auto-session',
+    config = function()
+      require("auto-session").setup {
+        log_level = "error",
+        auto_session_suppress_dirs = { "~/", "~/Projects", "~/Downloads", "/"},
+      }
+    end
   }
 })
 

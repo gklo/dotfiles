@@ -100,6 +100,10 @@ map { "n", "<leader>dt", ":DiffviewToggleFiles<CR>" }
 -- nvim-tree
 map { "n", "<C-e>", ":NvimTreeFindFileToggle<CR>" }
 
+-- term
+map { "n", "<leader>t", ":tabnew | term<CR>" }
+
+
 -- diagnostics
 -- map { 'n', '<tab>', ':cn<cr>' }
 -- map { 'n', '<s-tab>', ':cp<cr>' }
