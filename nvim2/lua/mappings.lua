@@ -11,6 +11,8 @@ local map = function(key)
   local buffer = opts.buffer
   opts.buffer = nil
 
+map { "n", "<leader>P", 'O<esc>"+]P' }
+map { "n", "<leader>P", 'O<esc>"+]P' }
   if buffer then
     vim.api.nvim_buf_set_keymap(0, key[1], key[2], key[3], opts)
   else
@@ -27,20 +29,25 @@ map { "c", "<m-bs>", "<c-w>" }
 map { "n", "<leader>y", '"+y' }
 map { "n", "<leader>yy", '"+yy' }
 map { "x", "<leader>y", '"+y' }
-map { "n", "<leader>p", 'o<esc>"+]p' }
-map { "n", "<leader>P", 'O<esc>"+]P' }
+-- map { "n", "<leader>p", 'o<esc>"+]p' }
+-- map { "n", "<leader>P", 'O<esc>"+]P' }
+map { "n", "<leader>p", '"+]p' }
+map { "n", "<leader>P", '"+]P' }
 -- indented paste
--- map { "n", "p", "]p" }
--- map {'n', 'p', '"0p'}
+map { "n", "p", "]p" }
+map { "n", "P", "]P" }
+-- vim.keymap.set({"x"}, "p", "<Plug>(YankyPutAfter)")
+-- vim.keymap.set({"x"}, "P", "<Plug>(YankyPutBefore)")
+-- vim.keymap.set({"n"}, "p", "<Plug>(YankyPutIndentAfter)")
+-- vim.keymap.set({"n"}, "P", "<Plug>(YankyPutIndentBefore)")
+-- vim.keymap.set({"n","x"}, "gp", "]<Plug>(YankyGPutAfter)")
+-- vim.keymap.set({"n","x"}, "gP", "]<Plug>(YankyGPutBefore)")
+-- vim.keymap.set({"n","x"}, "y", "<Plug>(YankyYank)")
 
 map {'n','gw', '<c-w>w'}
 
 -- custom command
 vim.cmd "command -nargs=1 -bar STab :set shiftwidth=<args> tabstop=<args> softtabstop=<args>"
-
--- toggleterm
--- map { "n", "<c-a>", '<Cmd>exe v:count1 . "ToggleTerm"<CR>' }
--- map { "t", "<c-a>", '<Cmd>exe v:count1 . "ToggleTerm"<CR>' }
 
 function _G.set_terminal_keymaps()
   local opts = { buffer = 0 }
@@ -82,7 +89,8 @@ map { "n", "<leader>fb", "<cmd>Telescope buffers<cr>" }
 map { "n", "<leader><leader>", "<cmd>Telescope buffers<cr>" }
 map { "n", "<leader>fh", "<cmd>Telescope oldfiles hidden=true<cr>" }
 map { "n", "<leader>fH", "<cmd>Telescope help_tags<cr>" }
-map { "n", "<leader>fs", "<cmd>Telescope lsp_document_symbols<cr>" }
+-- map { "n", "<leader>fs", "<cmd>Telescope lsp_document_symbols<cr>" }
+map { "n", "<leader>fs", "<cmd>lua require('telescope.builtin').lsp_document_symbols({ ignore_symbols = { 'property', 'variable' } })<cr>" }
 map { "n", "<leader>fS", "<cmd>Telescope lsp_dynamic_workspace_symbols<cr>" }
 map { "n", "<leader>fd", "<cmd>Telescope diagnostics<cr>" }
 map { "n", "<leader>fp", "<cmd>Telescope projects<cr>" }

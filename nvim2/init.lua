@@ -324,6 +324,11 @@ require('lazy').setup({
       return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
     end
 
+    function close_cmp()
+      cmp.mapping.close()
+      vim.cmd('stopinsert')
+    end
+
     cmp.setup({
       snippet = {
         expand = function(args)
@@ -337,7 +342,8 @@ require('lazy').setup({
       mapping = cmp.mapping.preset.insert({
         ['<C-b>'] = cmp.mapping.scroll_docs(-4),
         ['<C-f>'] = cmp.mapping.scroll_docs(4),
-        ['<C-e>'] = cmp.mapping.abort(),
+        -- ['<Esc>'] = cmp.mapping.close(),
+        ['<Esc>'] = close_cmp(),
         ['<CR>'] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
         ["<Tab>"] = cmp.mapping(function(fallback)
           if cmp.visible() then
@@ -440,8 +446,16 @@ require('lazy').setup({
   },
   {
     'shellRaining/hlchunk.nvim',
+    event = { "UIEnter" },
     config = function() 
-      require('hlchunk').setup {}
+      require('hlchunk').setup({
+        blank = {
+          enable = false
+        },
+        indent = {
+          enable = false
+        }
+      })
     end
   },
   {
@@ -450,12 +464,6 @@ require('lazy').setup({
       require("auto-save").setup()
     end
   },
-  -- {
-  --   'github/copilot.vim',
-  --   config = function()
-  --     vim.keymap.set("i", "<C-c>", "copilot#Accept('')", {expr=true, silent=true})
-  --   end
-  -- },
   {
     'zbirenbaum/copilot.lua',
     config = function()
@@ -472,20 +480,6 @@ require('lazy').setup({
       require("copilot_cmp").setup()
     end
   },
-  --{
-  --  "folke/flash.nvim",
-  --  event = "VeryLazy",
-  --  ---@type Flash.Config
-  --  opts = {},
-  --  -- stylua: ignore
-  --  keys = {
-  --    { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
-  --    { "S", mode = { "n", "o", "x" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
-  --    { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
-  --    { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
-  --    { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
-  --  },
-  --},
   {
     'rmagatti/auto-session',
     config = function()
@@ -494,7 +488,20 @@ require('lazy').setup({
         auto_session_suppress_dirs = { "~/", "~/Projects", "~/Downloads", "/"},
       }
     end
-  }
+  },
+  -- {
+  --   'gbprod/yanky.nvim',
+  --   config = function()
+  --     require('yanky').setup({
+  --       highlight = {
+  --         timer = 200,
+  --       },
+  --       preserve_cursor_position = {
+  --         enabled = true,
+  --       }
+  --     })
+  --   end
+  -- }
 })
 
 -- commands
