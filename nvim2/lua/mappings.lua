@@ -11,8 +11,6 @@ local map = function(key)
   local buffer = opts.buffer
   opts.buffer = nil
 
-map { "n", "<leader>P", 'O<esc>"+]P' }
-map { "n", "<leader>P", 'O<esc>"+]P' }
   if buffer then
     vim.api.nvim_buf_set_keymap(0, key[1], key[2], key[3], opts)
   else
