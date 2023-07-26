@@ -104,16 +104,56 @@ vim.diagnostic.config({
 -- autocomplete
 vim.o.pumheight = 10
 
+-- yank highlight and preserve cursor position
+local augroups = {}
+augroups.yankpost = {
+  save_cursor_position = {
+    event = { "VimEnter", "CursorMoved" },
+    pattern = "*",
+    callback = function()
+      cursor_pos = vim.fn.getpos('.')
+    end,
+  },
+
+  highlight_yank = {
+    event = "TextYankPost",
+    pattern = "*",
+    callback = function ()
+      vim.highlight.on_yank{higroup="IncSearch", timeout=200, on_visual=true}
+    end,
+  },
+
+  yank_restore_cursor = {
+    event = "TextYankPost",
+    pattern = "*",
+    callback = function()
+      local cursor = vim.fn.getpos('.')
+      if vim.v.event.operator == 'y' then
+        vim.fn.setpos('.', cursor_pos)
+      end
+    end,
+  },
+}
+for group, commands in pairs(augroups) do
+  local augroup = vim.api.nvim_create_augroup("AU_"..group, {clear = true})
+
+  for _, opts in pairs(commands) do
+    local event = opts.event
+    opts.event = nil
+    opts.group = augroup
+    vim.api.nvim_create_autocmd(event, opts)
+  end
+end
 
 -- highlight on yank
-vim.api.nvim_create_autocmd('TextYankPost', {
-  group = vim.api.nvim_create_augroup('highlight_yank', {}),
-  desc = 'Hightlight selection on yank',
-  pattern = '*',
-  callback = function()
-    vim.highlight.on_yank { higroup = 'IncSearch', timeout = 200 }
-  end,
-})
+-- vim.api.nvim_create_autocmd('TextYankPost', {
+--   group = vim.api.nvim_create_augroup('highlight_yank', {}),
+--   desc = 'Hightlight selection on yank',
+--   pattern = '*',
+--   callback = function()
+--     vim.highlight.on_yank { higroup = 'IncSearch', timeout = 200 }
+--   end,
+-- })
 
 -- search
 vim.o.incsearch = false
@@ -282,30 +322,21 @@ require('lazy').setup({
             return lspconfig.util.root_pattern(".git", "package.json", "tsconfig.json", "jsconfig.json")(fname) or
             vim.fn.getcwd()
           end
-        elseif server_name == 'eslint' then
-        elseif server_name == "sumneko_lua" then
-          local runtime_path = vim.split(package.path, ";")
-          table.insert(runtime_path, "lua/?.lua")
-          table.insert(runtime_path, "lua/?/init.lua")
+        elseif server_name == 'lua_ls' then
           opts.settings = {
             Lua = {
-              runtime = {
-                -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
-                version = 'LuaJIT',
-              },
               diagnostics = {
                 -- Get the language server to recognize the `vim` global
-                globals = { 'vim' },
+                globals = {
+                  'vim',
+                  'require'
+                },
               },
               workspace = {
                 -- Make the server aware of Neovim runtime files
                 library = vim.api.nvim_get_runtime_file("", true),
               },
-              -- Do not send telemetry data containing a randomized but unique identifier
-              telemetry = {
-                enable = false,
-              },
-            },
+            }
           }
         end
 
@@ -318,7 +349,7 @@ require('lazy').setup({
     local cmp = require 'cmp'
     local luasnip = require 'luasnip'
     if cmp == nil then return end
-
+    
     local has_words_before = function()
       local line, col = unpack(vim.api.nvim_win_get_cursor(0))
       return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
@@ -347,9 +378,8 @@ require('lazy').setup({
         ['<CR>'] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
         ["<Tab>"] = cmp.mapping(function(fallback)
           if cmp.visible() then
-            --[[ cmp.select_next_item() ]]
             cmp.confirm({ select = true })
-          elseif luasnip.expand_or_jumpable() then
+          elseif luasnip.expand_or_locally_jumpable() then -- locally makes it only jump when cursor gone back to the snippet region
             luasnip.expand_or_jump()
           elseif has_words_before() then
             cmp.complete()
@@ -487,6 +517,13 @@ require('lazy').setup({
         log_level = "error",
         auto_session_suppress_dirs = { "~/", "~/Projects", "~/Downloads", "/"},
       }
+    end
+  },
+  {
+    -- preserve cursor position after = >> <<
+    "gbprod/stay-in-place.nvim",
+    config = function()
+      require("stay-in-place").setup({})
     end
   },
   -- {
