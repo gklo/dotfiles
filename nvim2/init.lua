@@ -345,7 +345,7 @@ require('lazy').setup({
     })
   end },
   "neovim/nvim-lspconfig",
-  { 'hrsh7th/nvim-cmp', dependencies = { 'hrsh7th/cmp-nvim-lsp', 'hrsh7th/cmp-buffer', 'hrsh7th/cmp-path', 'hrsh7th/cmp-cmdline' }, config = function()
+  { 'hrsh7th/nvim-cmp', dependencies = { 'hrsh7th/cmp-nvim-lsp', 'hrsh7th/cmp-buffer', 'hrsh7th/cmp-path', 'hrsh7th/cmp-cmdline', 'onsails/lspkind.nvim' }, config = function()
     local cmp = require 'cmp'
     local luasnip = require 'luasnip'
     if cmp == nil then return end
@@ -370,6 +370,20 @@ require('lazy').setup({
         completion = cmp.config.window.bordered(),
         documentation = cmp.config.window.bordered(),
       },
+      formatting = {format = require('lspkind').cmp_format({
+        mode = 'symbol', -- show only symbol annotations
+        maxwidth = 50, -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
+        ellipsis_char = '...', -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
+
+        -- The function below will be called before any actual modifications from lspkind
+        -- so that you can provide more controls on popup customization. (See [#30](https://github.com/onsails/lspkind-nvim/pull/30))
+        before = function (entry, vim_item)
+          if entry.completion_item.detail ~= nil and entry.completion_item.detail ~= "" then
+            vim_item.menu = ' ' .. entry.completion_item.detail
+          end
+          return vim_item
+        end
+      })},
       mapping = cmp.mapping.preset.insert({
         ['<C-b>'] = cmp.mapping.scroll_docs(-4),
         ['<C-f>'] = cmp.mapping.scroll_docs(4),
