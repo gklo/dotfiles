@@ -388,7 +388,7 @@ require('lazy').setup({
         ['<C-b>'] = cmp.mapping.scroll_docs(-4),
         ['<C-f>'] = cmp.mapping.scroll_docs(4),
         -- ['<Esc>'] = cmp.mapping.close(),
-        ['<Esc>'] = close_cmp(),
+        -- ['<Esc>'] = close_cmp(),
         ['<CR>'] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
         ["<Tab>"] = cmp.mapping(function(fallback)
           if cmp.visible() then
@@ -413,7 +413,7 @@ require('lazy').setup({
         end, { "i", "s" }),
       }),
       sources = cmp.config.sources({
-        { name = "copilot", group_index = 1 },
+        { name = "copilot" },
         { name = 'nvim_lsp' },
         { name = 'luasnip' }, -- For luasnip users.
       }, {
@@ -533,26 +533,38 @@ require('lazy').setup({
       }
     end
   },
-  {
-    -- preserve cursor position after = >> <<
-    "gbprod/stay-in-place.nvim",
-    config = function()
-      require("stay-in-place").setup({})
-    end
-  },
   -- {
-  --   'gbprod/yanky.nvim',
+  --   -- preserve cursor position after = >> <<
+  --   "gbprod/stay-in-place.nvim",
   --   config = function()
-  --     require('yanky').setup({
-  --       highlight = {
-  --         timer = 200,
-  --       },
-  --       preserve_cursor_position = {
-  --         enabled = true,
-  --       }
-  --     })
+  --     require("stay-in-place").setup({})
   --   end
-  -- }
+  -- },
+  {
+    'nvim-treesitter/nvim-treesitter-textobjects',
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    config = function ()
+      require'nvim-treesitter.configs'.setup {
+	      textobjects = {
+    select = {
+      enable = true,
+      lookahead = true,
+      keymaps = {
+        ["af"] = "@function.outer",
+        ["if"] = "@function.inner",
+        -- You can also use captures from other query groups like `locals.scm`
+        ["as"] = { query = "@scope", query_group = "locals", desc = "Select language scope" },
+      },
+      selection_modes = {
+        -- ['@parameter.outer'] = 'v', -- charwise
+        ['@function.outer'] = 'V', -- linewise
+      },
+      include_surrounding_whitespace = true,
+    },
+  },
+      }
+    end
+  }
 })
 
 -- commands
