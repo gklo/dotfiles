@@ -200,9 +200,9 @@ require('lazy').setup({
   { 'tamton-aquib/staline.nvim', config = function()
     require "staline".setup {
       sections = {
-        left = { '  ', 'mode', 'file_name' },
-        mid = {},
-        right = { 'branch', 'line_column' }
+        left = { '  ', 'mode', 'file_name', 'branch' },
+        mid = {'lsp'},
+        right = { 'lsp_name', 'line_column' }
       },
       mode_colors = {
         i = "#d4be98",
@@ -212,8 +212,8 @@ require('lazy').setup({
       },
       defaults = {
         true_colors = true,
-        line_column = "%y [%l/%L] :%c ",
-        branch_symbol = " "
+        line_column = "%y",
+        -- branch_symbol = " "
       }
     }
   end },
