@@ -55,7 +55,7 @@ vim.o.rdt = 10000
 
 vim.o.foldnestmax = 1
 
-vim.o.lazyredraw = true
+-- vim.o.lazyredraw = true
 
 -- remove trailing space
 --autocmd BufWritePre * %s/\s\+$//e
@@ -106,8 +106,23 @@ require "paq" {
     'tpope/vim-repeat',
     'kana/vim-textobj-user',
     'sgur/vim-textobj-parameter',
-    'machakann/vim-highlightedyank'
+    'machakann/vim-highlightedyank',
+    'nvim-treesitter/nvim-treesitter',
+    'NMAC427/guess-indent.nvim',
+    'maxmellon/vim-jsx-pretty',
+    'tpope/vim-commentary',
+    'JoosepAlviste/nvim-ts-context-commentstring',
 }
+
+
+require 'nvim-treesitter.configs'.setup {
+    auto_install = true,
+    highlight = {
+        enabled = false
+    }
+}
+
+
 
 vim.g.highlightedyank_highlight_duration = 300
 -- vim.cmd('autocmd BufNewFile,BufRead,BufEnter *.js set buftype=javascriptreact')

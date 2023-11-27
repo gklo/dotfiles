@@ -6,7 +6,16 @@ vim.o.writebackup = false
 vim.o.termguicolors = true
 
 vim.o.background = "dark"
-vim.o.guifont = "SFMono Nerd Font:h11"
+-- vim.o.guifont = "SFMono Nerd Font:h11"
+vim.o.guifont = "JetbrainsMono Nerd Font:h10:#h-slight:#e-subpixelantialias"
+if vim.g.neovide then
+  vim.o.guifont = "JetbrainsMono Nerd Font:h10:#h-slight:#e-subpixelantialias"
+  vim.opt.linespace = 1
+  vim.g.neovide_cursor_trail_size = 0
+  vim.g.neovide_cursor_vfx_mode = "sonicboom"
+  vim.g.neovide_cursor_animate_in_insert_mode = false
+  vim.o.lazyredraw = true
+end
 
 -- vim.o.cursorline = true
 vim.o.signcolumn = "yes"
@@ -162,6 +171,13 @@ vim.o.incsearch = false
 vim.o.winbar = '%f'
 vim.o.laststatus = 3
 
+-- blink cursor
+-- vim.o.guicursor = table.concat({
+--   "n-v-c:block-Cursor/lCursor-blinkwait1000-blinkon100-blinkoff100",
+--   "i-ci:ver25-Cursor/lCursor-blinkwait1000-blinkon100-blinkoff100",
+--   "r:hor50-Cursor/lCursor-blinkwait100-blinkon100-blinkoff100"
+-- }, ",")
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
@@ -192,8 +208,8 @@ require('lazy').setup({
   {
     'folke/tokyonight.nvim',
     config = function()
-      vim.cmd [[colorscheme tokyonight-moon]]
-      vim.cmd [[highlight WinSeparator guifg=grey]]
+      -- vim.cmd [[colorscheme tokyonight-moon]]
+      -- vim.cmd [[highlight WinSeparator guifg=grey]]
     end
   },
 
@@ -299,6 +315,10 @@ require('lazy').setup({
     end
 
     local capabilities = require('cmp_nvim_lsp').default_capabilities()
+    capabilities.textDocument.foldingRange = {
+      dynamicRegistration = false,
+      lineFoldingOnly = true
+    }
     require("mason-lspconfig").setup_handlers({
       function(server_name) -- default handler (optional)
         local opts = {
@@ -503,12 +523,6 @@ require('lazy').setup({
     end
   },
   {
-    "https://git.sr.ht/~nedia/auto-save.nvim",
-    config = function()
-      require("auto-save").setup()
-    end
-  },
-  {
     'zbirenbaum/copilot.lua',
     config = function()
       require("copilot").setup({
@@ -533,7 +547,35 @@ require('lazy').setup({
       }
     end
   },
-  {'mfussenegger/nvim-treehopper'}
+  {'mfussenegger/nvim-treehopper'},
+  {'rebelot/kanagawa.nvim', config = function() vim.cmd[[colorscheme kanagawa]] end},
+  {'MunifTanjim/prettier.nvim', dependencies = 'jose-elias-alvarez/null-ls.nvim', config = function()
+    require('prettier').setup {
+      bin = 'prettierd',
+      filetypes = {
+        'json',
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact",
+      }
+    }
+  end},
+  {'kevinhwang91/nvim-ufo', dependencies = 'kevinhwang91/promise-async', config = function()
+    vim.o.foldcolumn = '0' -- '0' is not bad
+    vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
+    vim.o.foldlevelstart = 99
+    vim.o.foldenable = true
+    require('ufo').setup({
+      close_fold_kinds = {'imports'}
+    })
+  end},
+  {
+    'pocco81/auto-save.nvim',
+    config = function()
+      require("auto-save").setup()
+    end
+  },
 })
 
 -- commands
