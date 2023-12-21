@@ -16,6 +16,11 @@ if status is-interactive
     alias man="batman"
     alias grep="rg"
     alias nvm="fnm"
+    alias gco="git checkout"
+    alias gcm="git commit -m"
+    alias gst="git status"
+    alias gcf="git config -l"
+    alias gll="git log --oneline"
     fnm env --use-on-cd | source
 
     function vim-win

@@ -105,10 +105,18 @@ vim.cmd('autocmd TermOpen * setlocal nonumber norelativenumber')
 -- config lsp diagnostic
 vim.diagnostic.config({
   virtual_text = {
-    -- Do not underline text when severity is low (INFO or HINT).
     severity = { min = vim.diagnostic.severity.WARN },
   },
 })
+vim.lsp.handlers["textDocument/publishDiagnostics"] =
+    vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
+        -- Disable underline, it's very annoying
+        underline = false,
+        -- Enable virtual text, override spacing to 4
+        virtual_text = {spacing = 4},
+        signs = true,
+        update_in_insert = false
+    })
 
 -- autocomplete
 vim.o.pumheight = 10
@@ -153,16 +161,6 @@ for group, commands in pairs(augroups) do
     vim.api.nvim_create_autocmd(event, opts)
   end
 end
-
--- highlight on yank
--- vim.api.nvim_create_autocmd('TextYankPost', {
---   group = vim.api.nvim_create_augroup('highlight_yank', {}),
---   desc = 'Hightlight selection on yank',
---   pattern = '*',
---   callback = function()
---     vim.highlight.on_yank { higroup = 'IncSearch', timeout = 200 }
---   end,
--- })
 
 -- search
 vim.o.incsearch = false
@@ -224,7 +222,7 @@ require('lazy').setup({
         sections = {
           left = { '  ', 'mode', 'file_name', 'branch' },
           mid = { 'lsp' },
-          right = { 'lsp_name', 'line_column' }
+          right = { 'line_column' }
         },
         mode_colors = {
           i = "#d4be98",
@@ -267,7 +265,14 @@ require('lazy').setup({
         auto_install = true,
         highlight = {
           enabled = true
-        }
+        },
+        incremental_selection = {
+          enable = true,
+          keymaps = {
+            node_incremental = "v",
+            node_decremental = "V",
+          },
+        },
       }
     end
   },
@@ -275,7 +280,6 @@ require('lazy').setup({
     'JoosepAlviste/nvim-ts-context-commentstring',
     dependencies = { 'tpope/vim-commentary' },
     config = function()
-      require 'nvim-treesitter.configs'.setup {}
       require('ts_context_commentstring').setup {}
     end
   },
@@ -288,7 +292,7 @@ require('lazy').setup({
       require('mason').setup()
       local lspconfig = require 'lspconfig'
       require("mason-lspconfig").setup({
-        ensure_installed = { 'tsserver', 'tailwindcss', 'volar', 'sqlls', 'pyright', 'intelephense', 'marksman',
+        ensure_installed = { 'tsserver', 'tailwindcss', 'volar', 'sqlls', 'pyright', 'marksman',
           'eslint',
           'cssls', 'html', 'yamlls', 'jsonls', 'quick_lint_js' },
         automatic_installation = true
@@ -301,9 +305,9 @@ require('lazy').setup({
 
         local opts = { noremap = true, silent = true }
 
-        if client.name == 'eslint' then
-          vim.cmd('autocmd BufWritePre *.tsx,*.ts,*.jsx,*.js,*.json EslintFixAll')
-        end
+        -- if client.name == 'eslint' then
+        --   vim.cmd('autocmd BufWritePre *.tsx,*.ts,*.jsx,*.js,*.json EslintFixAll')
+        -- end
 
         buf_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.declaration()<cr>", opts)
         buf_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<cr>", opts)
@@ -385,17 +389,17 @@ require('lazy').setup({
   {
     'hrsh7th/nvim-cmp',
     dependencies = { 'hrsh7th/cmp-nvim-lsp', 'hrsh7th/cmp-buffer', 'hrsh7th/cmp-path', 'hrsh7th/cmp-cmdline',
-      'onsails/lspkind.nvim' },
+      'onsails/lspkind.nvim', 'zbirenbaum/copilot.lua' },
     config = function()
       local cmp = require 'cmp'
       local luasnip = require 'luasnip'
       if cmp == nil then return end
 
       local has_words_before = function()
-        local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+        local line, col = table.unpack(vim.api.nvim_win_get_cursor(0))
         return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
       end
-
+      
       function close_cmp()
         cmp.mapping.close()
         vim.cmd('stopinsert')
@@ -430,14 +434,14 @@ require('lazy').setup({
         mapping = cmp.mapping.preset.insert({
           ['<C-b>'] = cmp.mapping.scroll_docs(-4),
           ['<C-f>'] = cmp.mapping.scroll_docs(4),
-          -- ['<Esc>'] = cmp.mapping.close(),
-          -- ['<Esc>'] = close_cmp(),
           ['<CR>'] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
           ["<Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.confirm({ select = true })
             elseif luasnip.expand_or_locally_jumpable() then -- locally makes it only jump when cursor gone back to the snippet region
               luasnip.expand_or_jump()
+            elseif require("copilot.suggestion").is_visible() then
+              require("copilot.suggestion").accept_line()
             elseif has_words_before() then
               cmp.complete()
             else
@@ -456,7 +460,6 @@ require('lazy').setup({
           end, { "i", "s" }),
         }),
         sources = cmp.config.sources({
-          -- { name = "copilot" },
           { name = 'nvim_lsp' },
           { name = 'luasnip' }, -- For luasnip users.
         }, {
@@ -572,19 +575,12 @@ require('lazy').setup({
     end
   },
   {
-    "zbirenbaum/copilot-cmp",
-    after = { "copilot.lua" },
-    enabled = false,
-    config = function()
-      require("copilot_cmp").setup()
-    end
-  },
-  {
     'rmagatti/auto-session',
     config = function()
       require("auto-session").setup {
         log_level = "error",
         auto_session_suppress_dirs = { "~/", "~/Projects", "~/Downloads", "/" },
+        bypass_session_save_file_types={ 'NvimTree' },
       }
     end
   },
@@ -614,15 +610,15 @@ require('lazy').setup({
       vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
       vim.o.foldlevelstart = 99
       vim.o.foldenable = true
-      require('ufo').setup({
-        -- close_fold_kinds = { 'imports' }
-      })
+      require('ufo').setup()
     end
   },
   {
     'pocco81/auto-save.nvim',
     config = function()
-      require("auto-save").setup()
+      require("auto-save").setup({
+        debounce_delay = 3000,
+      })
     end
   },
   {
@@ -630,7 +626,15 @@ require('lazy').setup({
     config = function()
       vim.g.suda_smart_edit = true
     end
-  }
+  },
+  -- Lua
+  {
+    "0oAstro/dim.lua",
+    dependencies = { "nvim-treesitter/nvim-treesitter", "neovim/nvim-lspconfig" },
+    config = function()
+      require("dim").setup()
+    end
+  },
 })
 
 -- commands

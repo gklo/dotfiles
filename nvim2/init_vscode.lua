@@ -65,9 +65,9 @@ vim.o.showcmd = true
 
 local osname = vim.loop.os_uname().sysname
 if string.find(osname, "Windows") then
-  vim.o.shell = "cmd"
+    vim.o.shell = "cmd"
 elseif vim.fn.executable("fish") then
-  vim.o.shell = "fish"
+    vim.o.shell = "fish"
 end
 
 vim.o.splitbelow = true
@@ -97,8 +97,12 @@ vim.api.nvim_set_keymap('n', 'gr', '<cmd>call VSCodeNotify("references-view.find
 vim.api.nvim_set_keymap('n', '<leader>rn', '<cmd>call VSCodeNotify("editor.action.rename")<CR>', {})
 vim.api.nvim_set_keymap('n', '<leader>ff', '<cmd>call VSCodeNotify("workbench.action.quickOpen")<CR>', {})
 vim.api.nvim_set_keymap('n', '<leader>fg', '<cmd>call VSCodeNotify("workbench.action.findInFiles")<CR>', {})
-vim.api.nvim_set_keymap('n', '<leader>fb', '<cmd>call VSCodeNotify("workbench.action.showAllEditorsByMostRecentlyUsed")<CR>', {})
--- vim.api.nvim_set_keymap('n', 'gcc', '<cmd>call VSCodeNotify("editor.action.commentLine")<CR>', {})
+vim.api.nvim_set_keymap('n', '<leader>fb',
+    '<cmd>call VSCodeNotify("workbench.action.showAllEditorsByMostRecentlyUsed")<CR>', {})
+vim.api.nvim_set_keymap('n', '<leader>ef',
+    '<cmd>call VSCodeNotify("editor.action.formatDocument")<CR>', {})
+vim.api.nvim_set_keymap('x', '<leader>ef',
+    '<cmd>call VSCodeNotify("editor.action.formatSelection")<CR>', {})
 
 require "paq" {
     "savq/paq-nvim", -- Let Paq manage itself
@@ -114,7 +118,6 @@ require "paq" {
     'JoosepAlviste/nvim-ts-context-commentstring',
 }
 
-
 require 'nvim-treesitter.configs'.setup {
     auto_install = true,
     highlight = {
@@ -122,8 +125,8 @@ require 'nvim-treesitter.configs'.setup {
     }
 }
 
-
-
 vim.g.highlightedyank_highlight_duration = 300
 -- vim.cmd('autocmd BufNewFile,BufRead,BufEnter *.js set buftype=javascriptreact')
 -- vim.cmd('autocmd BufNewFile,BufRead,BufEnter *.css set buftype=css')
+
+vim.o.clipboard = "unnamedplus"
