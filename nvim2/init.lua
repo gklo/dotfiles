@@ -365,6 +365,9 @@ require('lazy').setup({
           elseif server_name == 'lua_ls' then
             opts.settings = {
               Lua = {
+                runtime = {
+                  version = 'LuaJIT',
+                },
                 diagnostics = {
                   -- Get the language server to recognize the `vim` global
                   globals = {
@@ -396,13 +399,8 @@ require('lazy').setup({
       if cmp == nil then return end
 
       local has_words_before = function()
-        local line, col = table.unpack(vim.api.nvim_win_get_cursor(0))
+        local line, col = unpack(vim.api.nvim_win_get_cursor(0))
         return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
-      end
-      
-      function close_cmp()
-        cmp.mapping.close()
-        vim.cmd('stopinsert')
       end
 
       cmp.setup({
@@ -438,10 +436,10 @@ require('lazy').setup({
           ["<Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.confirm({ select = true })
+            elseif require('copilot.suggestion').is_visible() then
+              require("copilot.suggestion").accept()
             elseif luasnip.expand_or_locally_jumpable() then -- locally makes it only jump when cursor gone back to the snippet region
               luasnip.expand_or_jump()
-            elseif require("copilot.suggestion").is_visible() then
-              require("copilot.suggestion").accept_line()
             elseif has_words_before() then
               cmp.complete()
             else
@@ -564,9 +562,9 @@ require('lazy').setup({
       require("copilot").setup({
         suggestion = {
           auto_trigger = true,
-          keymap = {
-            accept = '<Tab>',
-          },
+          -- keymap = {
+          --   accept = '<Tab>',
+          -- },
         }
         -- for cmp
         -- suggestion = { enabled = false },

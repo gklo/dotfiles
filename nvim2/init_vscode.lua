@@ -122,11 +122,16 @@ require 'nvim-treesitter.configs'.setup {
     auto_install = true,
     highlight = {
         enabled = false
-    }
+    },
+    incremental_selection = {
+        enable = true,
+        keymaps = {
+            node_incremental = "v",
+            node_decremental = "V",
+        },
+    },
 }
 
 vim.g.highlightedyank_highlight_duration = 300
--- vim.cmd('autocmd BufNewFile,BufRead,BufEnter *.js set buftype=javascriptreact')
--- vim.cmd('autocmd BufNewFile,BufRead,BufEnter *.css set buftype=css')
 
 vim.o.clipboard = "unnamedplus"
