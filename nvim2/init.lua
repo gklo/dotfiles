@@ -18,8 +18,8 @@ if vim.g.neovide then
 end
 
 -- vim.o.cursorline = true
-vim.o.signcolumn = "yes"
-vim.o.number = true
+-- vim.o.signcolumn = "yes"
+-- vim.o.number = true
 
 vim.o.tabstop = 2
 vim.o.shiftwidth = 2
@@ -114,7 +114,8 @@ vim.lsp.handlers["textDocument/publishDiagnostics"] =
         underline = false,
         -- Enable virtual text, override spacing to 4
         virtual_text = {spacing = 4},
-        signs = true,
+        -- signs = true,
+        signs = false,
         update_in_insert = false
     })
 
@@ -232,7 +233,7 @@ require('lazy').setup({
         },
         defaults = {
           true_colors = true,
-          line_column = "%y",
+          line_column = "%l:%c %y",
           -- branch_symbol = " "
         }
       }
@@ -280,7 +281,7 @@ require('lazy').setup({
     'JoosepAlviste/nvim-ts-context-commentstring',
     dependencies = { 'tpope/vim-commentary' },
     config = function()
-      require('ts_context_commentstring').setup {}
+      require('ts_context_commentstring').setup{}
     end
   },
 
@@ -294,7 +295,7 @@ require('lazy').setup({
       require("mason-lspconfig").setup({
         ensure_installed = { 'tsserver', 'tailwindcss', 'volar', 'sqlls', 'pyright', 'marksman',
           'eslint',
-          'cssls', 'html', 'yamlls', 'jsonls', 'quick_lint_js' },
+          'cssls', 'html', 'yamlls', 'jsonls' },
         automatic_installation = true
       })
 
@@ -313,8 +314,12 @@ require('lazy').setup({
         buf_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<cr>", opts)
         buf_set_keymap("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<cr>", opts)
         buf_set_keymap("n", "gh", "<cmd>lua vim.diagnostic.open_float()<cr>", opts)
-        buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
+        buf_set_keymap('n', 'gc', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
         buf_set_keymap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<cr>", opts)
+
+        buf_set_keymap( "n", "gr", "<cmd>Telescope lsp_references<CR>", opts)
+        buf_set_keymap( "n", "gv", "<cmd>vsplit<CR><cmd>lua vim.lsp.buf.definition()<cr>", opts)
+        buf_set_keymap( "n", "H", "<cmd>lua vim.lsp.buf.hover()<cr>", opts)
 
         if client.server_capabilities.documenthighlightprovider then
           vim.api.nvim_create_augroup("lsp_document_highlight", { clear = true })
@@ -396,6 +401,7 @@ require('lazy').setup({
     config = function()
       local cmp = require 'cmp'
       local luasnip = require 'luasnip'
+      local copilot = require 'copilot.suggestion'
       if cmp == nil then return end
 
       local has_words_before = function()
@@ -436,12 +442,12 @@ require('lazy').setup({
           ["<Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.confirm({ select = true })
-            elseif require('copilot.suggestion').is_visible() then
-              require("copilot.suggestion").accept()
+            elseif copilot.is_visible() then
+              copilot.accept()
             elseif luasnip.expand_or_locally_jumpable() then -- locally makes it only jump when cursor gone back to the snippet region
               luasnip.expand_or_jump()
-            elseif has_words_before() then
-              cmp.complete()
+            -- elseif has_words_before() then
+            --   cmp.complete()
             else
               fallback()
             end
@@ -562,13 +568,7 @@ require('lazy').setup({
       require("copilot").setup({
         suggestion = {
           auto_trigger = true,
-          -- keymap = {
-          --   accept = '<Tab>',
-          -- },
         }
-        -- for cmp
-        -- suggestion = { enabled = false },
-        -- panel = { enabled = false },
       })
     end
   },
@@ -582,8 +582,11 @@ require('lazy').setup({
       }
     end
   },
-  { 'mfussenegger/nvim-treehopper' },
-  { 'rebelot/kanagawa.nvim',       config = function() vim.cmd [[colorscheme kanagawa]] end },
+  {
+    'rebelot/kanagawa.nvim', config = function()
+      vim.cmd [[colorscheme kanagawa]]
+    end
+  },
   {
     'MunifTanjim/prettier.nvim',
     dependencies = 'jose-elias-alvarez/null-ls.nvim',
@@ -598,17 +601,6 @@ require('lazy').setup({
           "typescriptreact",
         }
       }
-    end
-  },
-  {
-    'kevinhwang91/nvim-ufo',
-    dependencies = 'kevinhwang91/promise-async',
-    config = function()
-      vim.o.foldcolumn = '0' -- '0' is not bad
-      vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
-      vim.o.foldlevelstart = 99
-      vim.o.foldenable = true
-      require('ufo').setup()
     end
   },
   {
@@ -631,6 +623,33 @@ require('lazy').setup({
     dependencies = { "nvim-treesitter/nvim-treesitter", "neovim/nvim-lspconfig" },
     config = function()
       require("dim").setup()
+    end
+  },
+  {
+    "ray-x/lsp_signature.nvim",
+    event = "VeryLazy",
+    opts = {
+      -- hint_enable = false,
+      -- floating_window_above_cur_line = false,
+      floating_window = false,
+      floating_window_off_x = 1,
+      floating_window_off_y = 1,
+    },
+    config = function(_, opts) require'lsp_signature'.setup(opts) end
+  },
+  { -- peek definition
+    "dnlhc/glance.nvim",
+    event = "VeryLazy",
+    config = function()
+      require('glance').setup({
+        -- your configuration
+      })
+    end,
+  },
+  { -- keep cursor in place after > or =
+    "gbprod/stay-in-place.nvim",
+    config = function()
+      require("stay-in-place").setup()
     end
   },
 })

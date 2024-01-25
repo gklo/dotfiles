@@ -106,11 +106,7 @@ map { "n", "<leader>t", ":tabnew | term<CR>" }
 -- map { 'n', '<s-tab>', ':cp<cr>' }
 
 -- lsp
-map { "n", "gr", "<cmd>Telescope lsp_references<CR>", { slient = true } }
-map { "n", "gv", "<cmd>vsplit<CR><cmd>lua vim.lsp.buf.definition()<cr>", { silent = true } }
-map { "n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<cr>", { silent = true } }
-map { "n", "<leader>H", "<cmd>lua vim.diagnostic.open_float()<cr>", { silent = true } }
-map { "n", "H", "<cmd>lua vim.lsp.buf.hover()<cr>", { silent = true } }
+map { 'n', 'gp', '<CMD>Glance definitions<CR>' }
 
 map {'o', 'm', ":<C-U>lua require('tsht').nodes()<CR>", {slient=true}}
 map {'x', 'm', ":lua require('tsht').nodes()<CR>", {slient=true}}
