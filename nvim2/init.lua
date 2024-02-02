@@ -14,7 +14,7 @@ if vim.g.neovide then
   vim.g.neovide_cursor_trail_size = 0
   vim.g.neovide_cursor_vfx_mode = "sonicboom"
   vim.g.neovide_cursor_animate_in_insert_mode = false
-  vim.o.lazyredraw = true
+  -- vim.o.lazyredraw = true
 end
 
 -- vim.o.cursorline = true
@@ -64,7 +64,7 @@ vim.o.rdt = 10000
 
 vim.o.foldnestmax = 1
 
-vim.o.lazyredraw = true
+-- vim.o.lazyredraw = true
 
 -- remove trailing space
 --autocmd BufWritePre * %s/\s\+$//e
@@ -221,7 +221,7 @@ require('lazy').setup({
     config = function()
       require "staline".setup {
         sections = {
-          left = { '  ', 'mode', 'file_name', 'branch' },
+          left = { 'file_name', 'branch' },
           mid = { 'lsp' },
           right = { 'line_column' }
         },
@@ -245,6 +245,11 @@ require('lazy').setup({
     dependencies = { { 'nvim-lua/plenary.nvim' } },
     config = function()
       require('telescope').setup({
+        pickers = {
+          colorscheme = {
+            enable_preview = true
+          }
+        },
         defaults = {
           layout_strategy = 'vertical',
           layout_config = {
@@ -293,10 +298,11 @@ require('lazy').setup({
       require('mason').setup()
       local lspconfig = require 'lspconfig'
       require("mason-lspconfig").setup({
-        ensure_installed = { 'tsserver', 'tailwindcss', 'volar', 'sqlls', 'pyright', 'marksman',
+        ensure_installed = {'tailwindcss', 'volar', 'sqlls', 'pyright', 'marksman',
           'eslint',
           'cssls', 'html', 'yamlls', 'jsonls' },
-        automatic_installation = true
+        automatic_installation = { exclude = 'tsserver'}
+        -- automatic_installation = true
       })
 
       local on_attach = function(client, bufnr)
@@ -310,11 +316,11 @@ require('lazy').setup({
         --   vim.cmd('autocmd BufWritePre *.tsx,*.ts,*.jsx,*.js,*.json EslintFixAll')
         -- end
 
-        buf_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.declaration()<cr>", opts)
-        buf_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<cr>", opts)
+        buf_set_keymap("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<cr>", opts)
+        buf_set_keymap("n", "gd", "<cmd>Telescope lsp_definitions<cr>", opts)
         buf_set_keymap("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<cr>", opts)
         buf_set_keymap("n", "gh", "<cmd>lua vim.diagnostic.open_float()<cr>", opts)
-        buf_set_keymap('n', 'gc', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
+        buf_set_keymap('n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
         buf_set_keymap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<cr>", opts)
 
         buf_set_keymap( "n", "gr", "<cmd>Telescope lsp_references<CR>", opts)
@@ -535,9 +541,50 @@ require('lazy').setup({
     dependencies = {
       'nvim-tree/nvim-web-devicons', -- optional
     },
-    config = function()
-      require("nvim-tree").setup {}
-    end
+    opts = {
+      on_attach = function(bufnr)
+        local api = require "nvim-tree.api"
+        api.config.mappings.default_on_attach(bufnr)
+        -- set no horizontal scroll
+        vim.api.nvim_exec('set mousescroll=hor:0', true)
+      end,
+      hijack_cursor = true, -- keep cursor on the first letter
+      renderer = {
+        indent_width = 2,
+        icons = {
+          git_placement = "signcolumn",
+          show = {
+            folder_arrow = false,
+          },
+          glyphs = {
+            folder = {
+              default = '',
+              open = '',
+              symlink = '',
+            },
+          }
+        },
+        indent_markers = {
+          enable = true,
+        },
+      },
+      diagnostics = {
+        enable = true,
+        show_on_dirs = true,
+      },
+      filters = {
+        custom = {
+          "^.git$",
+          "^.github$",
+        },
+      },
+      actions = {
+        change_dir = {
+          enable = false,
+          restrict_above_cwd = true,
+        },
+      }
+    }
   },
   {
     'maxmellon/vim-jsx-pretty',
@@ -574,17 +621,27 @@ require('lazy').setup({
   },
   {
     'rmagatti/auto-session',
+    dependencies = 'nvim-tree/nvim-tree.lua',
     config = function()
+      local api = require "nvim-tree.api"
+      local function close_nvim_tree()
+        api.tree.close()
+      end
+      -- local function open_nvim_tree()
+      --   api.tree.open()
+      -- end
       require("auto-session").setup {
         log_level = "error",
         auto_session_suppress_dirs = { "~/", "~/Projects", "~/Downloads", "/" },
         bypass_session_save_file_types={ 'NvimTree' },
+        -- fix nvim-tree
+        pre_save_cmds = {close_nvim_tree},
       }
     end
   },
   {
     'rebelot/kanagawa.nvim', config = function()
-      vim.cmd [[colorscheme kanagawa]]
+      -- vim.cmd [[colorscheme kanagawa]]
     end
   },
   {
@@ -625,18 +682,6 @@ require('lazy').setup({
       require("dim").setup()
     end
   },
-  {
-    "ray-x/lsp_signature.nvim",
-    event = "VeryLazy",
-    opts = {
-      -- hint_enable = false,
-      -- floating_window_above_cur_line = false,
-      floating_window = false,
-      floating_window_off_x = 1,
-      floating_window_off_y = 1,
-    },
-    config = function(_, opts) require'lsp_signature'.setup(opts) end
-  },
   { -- peek definition
     "dnlhc/glance.nvim",
     event = "VeryLazy",
@@ -652,6 +697,40 @@ require('lazy').setup({
       require("stay-in-place").setup()
     end
   },
+  {
+    "pmizio/typescript-tools.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+    opts = {},
+  },
+  {
+    'AlexvZyl/nordic.nvim',
+    lazy = false,
+    priority = 1000,
+    config = function()
+      require 'nordic' .load()
+    end
+  },
+  {
+    "folke/noice.nvim",
+    event = "VeryLazy",
+    opts = {
+      messages = {
+        view_warn = "mini",
+        view = "mini",
+      }
+    },
+    dependencies = {
+      "MunifTanjim/nui.nvim",
+      "rcarriga/nvim-notify",
+    }
+  },
+  {
+    "EdenEast/nightfox.nvim",
+    lazy = false, 
+    config = function ()
+      -- vim.cmd [[colorscheme duskfox]]
+    end
+  }
 })
 
 -- commands

@@ -63,15 +63,16 @@ local hasEslint = function()
   return result
 end
 
-function _G.my_format()
+function _G.custom_format()
   if hasEslint() then
     vim.cmd 'EslintFixAll'
+    vim.cmd 'Prettier'
   else
     vim.lsp.buf.format({ async = true })
   end
 end
 
-map { 'n', '<leader>ef', '<cmd>lua my_format()<cr>' }
+map { 'n', '<leader>ef', '<cmd>lua custom_format()<cr>' }
 
 -- telescope
 map { "n", "<leader>ff", "<cmd>Telescope find_files hidden=true<cr>" }
@@ -95,7 +96,7 @@ map { "n", "<leader>df", ":DiffviewFileHistory %<CR>" }
 map { "n", "<leader>dt", ":DiffviewToggleFiles<CR>" }
 
 -- nvim-tree
-map { "n", "<C-e>", ":NvimTreeFindFileToggle<CR>" }
+map { "n", "<C-z>", ":NvimTreeFindFileToggle<CR>" }
 
 -- term
 map { "n", "<leader>t", ":tabnew | term<CR>" }
