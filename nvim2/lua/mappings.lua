@@ -66,6 +66,9 @@ end
 function _G.custom_format()
   if hasEslint() then
     vim.cmd 'EslintFixAll'
+    vim.cmd 'Prettier'
+  else
+    vim.lsp.buf.format({ async = true })
   end
 
   vim.lsp.buf.format({ async = true })
