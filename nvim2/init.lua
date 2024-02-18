@@ -251,6 +251,7 @@ require('lazy').setup({
           }
         },
         defaults = {
+          file_ignore_patterns = { ".git", "node_modules", "vendor" },
           layout_strategy = 'vertical',
           layout_config = {
             vertical = {
@@ -300,8 +301,8 @@ require('lazy').setup({
       require("mason-lspconfig").setup({
         ensure_installed = {'tailwindcss', 'volar', 'sqlls', 'pyright', 'marksman',
           'eslint',
-          'cssls', 'html', 'yamlls', 'jsonls' },
-        automatic_installation = { exclude = 'tsserver'}
+          'cssls', 'html', 'yamlls', 'jsonls', 'prettierd', 'tsserver' },
+        automatic_installation = true
         -- automatic_installation = true
       })
 
@@ -364,7 +365,7 @@ require('lazy').setup({
           if server_name == 'tsserver' then
             opts.settings = {
               implicitProjectConfiguration = {
-                checkJs = true
+                -- checkJs = true
               },
             }
           end
@@ -645,22 +646,6 @@ require('lazy').setup({
     end
   },
   {
-    'MunifTanjim/prettier.nvim',
-    dependencies = 'jose-elias-alvarez/null-ls.nvim',
-    config = function()
-      require('prettier').setup {
-        bin = 'prettierd',
-        filetypes = {
-          'json',
-          "javascript",
-          "javascriptreact",
-          "typescript",
-          "typescriptreact",
-        }
-      }
-    end
-  },
-  {
     'pocco81/auto-save.nvim',
     config = function()
       require("auto-save").setup({
@@ -696,11 +681,6 @@ require('lazy').setup({
     config = function()
       require("stay-in-place").setup()
     end
-  },
-  {
-    "pmizio/typescript-tools.nvim",
-    dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
-    opts = {},
   },
   {
     'AlexvZyl/nordic.nvim',
