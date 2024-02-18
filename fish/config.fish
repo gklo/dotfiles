@@ -11,8 +11,8 @@ if status is-interactive
     alias icat="kitty +kitten icat"
     alias cat=bat
     alias vim=nvim    
-    alias ls=exa
-    alias ll="exa -l"    
+    alias ls=eza
+    alias ll="eza -l"    
     alias man="batman"
     alias grep="rg"
     alias nvm="fnm"
