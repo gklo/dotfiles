@@ -6,15 +6,37 @@ vim.o.writebackup = false
 vim.o.termguicolors = true
 
 vim.o.background = "dark"
--- vim.o.guifont = "SFMono Nerd Font:h11"
+
 vim.o.guifont = "JetbrainsMono Nerd Font:h10:#h-slight:#e-subpixelantialias"
 if vim.g.neovide then
-	vim.o.guifont = "JetbrainsMono Nerd Font:h10:#h-slight:#e-subpixelantialias"
+	vim.o.guifont = "JetbrainsMono Nerd Font:h13"
 	vim.opt.linespace = 1
-	vim.g.neovide_cursor_trail_size = 0
-	vim.g.neovide_cursor_vfx_mode = "sonicboom"
+	vim.g.neovide_cursor_vfx_mode = "railgun"
 	vim.g.neovide_cursor_animate_in_insert_mode = false
-	-- vim.o.lazyredraw = true
+	vim.g.neovide_scroll_animation_length = 0
+	vim.g.neovide_cursor_trail_size = 0.1
+
+	vim.keymap.set('v', '<D-c>', '"+y')        -- Copy
+	vim.keymap.set('n', '<D-v>', '"+P')        -- Paste normal mode
+	vim.keymap.set('v', '<D-v>', '"+P')        -- Paste visual mode
+	vim.keymap.set('c', '<D-v>', '<C-R>+')     -- Paste command mode
+	vim.keymap.set('i', '<D-v>', '<ESC>l"+Pli') -- Paste insert mode
+
+	vim.g.neovide_scale_factor = 1.0
+	local change_scale_factor = function(delta)
+		vim.g.neovide_scale_factor = vim.g.neovide_scale_factor * delta
+	end
+	vim.keymap.set("n", "<C-=>", function()
+		change_scale_factor(1.25)
+	end)
+	vim.keymap.set("n", "<C-->", function()
+		change_scale_factor(1 / 1.25)
+	end)
+
+	local map = vim.keymap
+	map.set({ "n", "v" }, "<D-+>", ":lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.1<CR>")
+	map.set({ "n", "v" }, "<D-->", ":lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor - 0.1<CR>")
+	map.set({ "n" , "v" }, "<D-0>", ":lua vim.g.neovide_scale_factor = 1<CR>")
 end
 
 -- vim.o.cursorline = true
@@ -102,6 +124,8 @@ vim.o.wrap = true
 -- disable terminal numbers
 vim.cmd("autocmd TermOpen * setlocal nonumber norelativenumber")
 
+vim.cmd("autocmd BufNewFile,BufRead *.js set filetype=javascriptreact")
+
 -- config lsp diagnostic
 vim.diagnostic.config({
 	virtual_text = {
@@ -166,16 +190,8 @@ end
 vim.o.incsearch = false
 
 -- 0.8 features
-vim.o.winbar = "%f"
+-- vim.o.winbar = "%f"
 vim.o.laststatus = 3
-
--- blink cursor
--- vim.o.guicursor = table.concat({
---   "n-v-c:block-Cursor/lCursor-blinkwait1000-blinkon100-blinkoff100",
---   "i-ci:ver25-Cursor/lCursor-blinkwait1000-blinkon100-blinkoff100",
---   "r:hor50-Cursor/lCursor-blinkwait100-blinkon100-blinkoff100"
--- }, ",")
---
 
 vim.g.neovide_scroll_animation_length = 0.3
 
@@ -220,8 +236,8 @@ require("lazy").setup({
 		config = function()
 			require("staline").setup({
 				sections = {
-					left = { "file_name", "branch" },
-					mid = { "lsp" },
+					left = { "cwd", "branch" },
+					mid = {},
 					right = { "line_column" },
 				},
 				mode_colors = {
@@ -429,12 +445,6 @@ require("lazy").setup({
 				return
 			end
 
-			local has_words_before = function()
-				local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-				return col ~= 0
-					and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
-			end
-
 			cmp.setup({
 				snippet = {
 					expand = function(args)
@@ -447,8 +457,7 @@ require("lazy").setup({
 				},
 				formatting = {
 					format = require("lspkind").cmp_format({
-						mode = "symbol", -- show only symbol annotations
-						maxwidth = 50, -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
+						maxwidth = 50,   -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
 						ellipsis_char = "...", -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
 
 						-- The function below will be called before any actual modifications from lspkind
@@ -472,8 +481,8 @@ require("lazy").setup({
 							copilot.accept()
 						elseif luasnip.expand_or_locally_jumpable() then -- locally makes it only jump when cursor gone back to the snippet region
 							luasnip.expand_or_jump()
-						-- elseif has_words_before() then
-						--   cmp.complete()
+							-- elseif has_words_before() then
+							--   cmp.complete()
 						else
 							fallback()
 						end
@@ -664,7 +673,7 @@ require("lazy").setup({
 	{
 		"rebelot/kanagawa.nvim",
 		config = function()
-			-- vim.cmd [[colorscheme kanagawa]]
+			vim.cmd [[colorscheme kanagawa]]
 		end,
 	},
 	{
@@ -709,7 +718,7 @@ require("lazy").setup({
 		lazy = false,
 		priority = 1000,
 		config = function()
-			require("nordic").load()
+			-- require("nordic").load()
 		end,
 	},
 	{
@@ -717,6 +726,7 @@ require("lazy").setup({
 		event = "VeryLazy",
 		opts = {
 			messages = {
+				view_error = "mini",
 				view_warn = "mini",
 				view = "mini",
 			},
@@ -749,7 +759,22 @@ require("lazy").setup({
 			})
 		end,
 	},
+	{
+		"utilyre/barbecue.nvim",
+		name = "barbecue",
+		version = "*",
+		dependencies = {
+			"SmiteshP/nvim-navic",
+			"nvim-tree/nvim-web-devicons", -- optional dependency
+		},
+		opts = {
+			-- configurations go here
+		},
+	}
 })
 
 -- commands
 require("mappings")
+
+-- override
+vim.cmd [[highlight WinSeparator guifg=darkgray1]]

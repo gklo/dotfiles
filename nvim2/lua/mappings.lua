@@ -103,6 +103,10 @@ map { "n", "<C-z>", ":NvimTreeFindFileToggle<CR>" }
 -- term
 map { "n", "<leader>t", ":tabnew | term<CR>" }
 
+-- nvaigation
+map { "n", "<C-j>", "<C-d>" }
+map { "n", "<C-k>", "<C-u>" }
+map { "n", "ZA", "<cmd>qa!" }
 
 -- diagnostics
 -- map { 'n', '<tab>', ':cn<cr>' }
