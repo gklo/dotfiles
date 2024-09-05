@@ -778,3 +778,5 @@ require("mappings")
 
 -- override
 vim.cmd [[highlight WinSeparator guifg=darkgray1]]
+
+vim.cmd [[autocmd VimEnter * silent! !prettierd restart]]
