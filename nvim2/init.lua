@@ -36,11 +36,11 @@ if vim.g.neovide then
 	local map = vim.keymap
 	map.set({ "n", "v" }, "<D-+>", ":lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.1<CR>")
 	map.set({ "n", "v" }, "<D-->", ":lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor - 0.1<CR>")
-	map.set({ "n" , "v" }, "<D-0>", ":lua vim.g.neovide_scale_factor = 1<CR>")
+	map.set({ "n", "v" }, "<D-0>", ":lua vim.g.neovide_scale_factor = 1<CR>")
 end
 
 -- vim.o.cursorline = true
--- vim.o.signcolumn = "yes"
+vim.o.signcolumn = "yes" -- always show sign column, so to won't shift the text all the time when lsp error shows up
 -- vim.o.number = true
 
 vim.o.tabstop = 2
@@ -226,7 +226,7 @@ require("lazy").setup({
 	{
 		"folke/tokyonight.nvim",
 		config = function()
-			-- vim.cmd [[colorscheme tokyonight-moon]]
+			-- vim.cmd [[colorscheme tokyonight-storm]]
 			-- vim.cmd [[highlight WinSeparator guifg=grey]]
 		end,
 	},
@@ -311,8 +311,9 @@ require("lazy").setup({
 		"williamboman/mason-lspconfig.nvim",
 		dependencies = { "williamboman/mason.nvim" },
 		config = function()
-			require("mason").setup()
 			local lspconfig = require("lspconfig")
+
+			require("mason").setup()
 			require("mason-lspconfig").setup({
 				ensure_installed = {
 					"tailwindcss",
@@ -325,10 +326,9 @@ require("lazy").setup({
 					"html",
 					"yamlls",
 					"jsonls",
-					"tsserver",
+					"ts_ls",
 				},
 				automatic_installation = true,
-				-- automatic_installation = true
 			})
 
 			local on_attach = function(client, bufnr)
@@ -337,10 +337,6 @@ require("lazy").setup({
 				end
 
 				local opts = { noremap = true, silent = true }
-
-				-- if client.name == 'eslint' then
-				--   vim.cmd('autocmd BufWritePre *.tsx,*.ts,*.jsx,*.js,*.json EslintFixAll')
-				-- end
 
 				buf_set_keymap("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<cr>", opts)
 				buf_set_keymap("n", "gd", "<cmd>Telescope lsp_definitions<cr>", opts)
@@ -353,6 +349,7 @@ require("lazy").setup({
 				buf_set_keymap("n", "gv", "<cmd>vsplit<CR><cmd>lua vim.lsp.buf.definition()<cr>", opts)
 				buf_set_keymap("n", "H", "<cmd>lua vim.lsp.buf.hover()<cr>", opts)
 
+				-- highlight references
 				if client.server_capabilities.documenthighlightprovider then
 					vim.api.nvim_create_augroup("lsp_document_highlight", { clear = true })
 					vim.api.nvim_clear_autocmds({ buffer = bufnr, group = "lsp_document_highlight" })
@@ -371,30 +368,23 @@ require("lazy").setup({
 				end
 			end
 
+			-- capabilities
 			local capabilities = require("cmp_nvim_lsp").default_capabilities()
 			capabilities.textDocument.foldingRange = {
 				dynamicRegistration = false,
 				lineFoldingOnly = true,
 			}
+
+			-- setup lsp
 			require("mason-lspconfig").setup_handlers({
 				function(server_name) -- default handler (optional)
 					local opts = {
 						on_attach = on_attach,
 						capabilities = capabilities,
 						single_file_support = true,
-						-- flags = {
-						--   debounce_text_changes = 2000
-						-- }
 					}
 
-					if server_name == "tsserver" then
-						opts.settings = {
-							implicitProjectConfiguration = {
-								-- checkJs = true
-							},
-						}
-					end
-					if server_name == "tsserver" or server_name == "tailwindcss" then
+					if server_name == "ts_ls" or server_name == "tailwindcss" then
 						opts.root_dir = function(fname)
 							return lspconfig.util.root_pattern(".git", "package.json", "tsconfig.json", "jsconfig.json")(
 								fname
@@ -407,14 +397,12 @@ require("lazy").setup({
 									version = "LuaJIT",
 								},
 								diagnostics = {
-									-- Get the language server to recognize the `vim` global
 									globals = {
 										"vim",
 										"require",
 									},
 								},
 								workspace = {
-									-- Make the server aware of Neovim runtime files
 									library = vim.api.nvim_get_runtime_file("", true),
 								},
 							},
@@ -475,10 +463,10 @@ require("lazy").setup({
 					["<C-f>"] = cmp.mapping.scroll_docs(4),
 					["<CR>"] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
 					["<Tab>"] = cmp.mapping(function(fallback)
-						if cmp.visible() then
-							cmp.confirm({ select = true })
-						elseif copilot.is_visible() then
+						if copilot.is_visible() then
 							copilot.accept()
+						elseif cmp.visible() then
+							cmp.confirm({ select = true })
 						elseif luasnip.expand_or_locally_jumpable() then -- locally makes it only jump when cursor gone back to the snippet region
 							luasnip.expand_or_jump()
 							-- elseif has_words_before() then
@@ -673,7 +661,7 @@ require("lazy").setup({
 	{
 		"rebelot/kanagawa.nvim",
 		config = function()
-			vim.cmd [[colorscheme kanagawa]]
+			-- vim.cmd [[colorscheme kanagawa]]
 		end,
 	},
 	{
@@ -772,23 +760,44 @@ require("lazy").setup({
 		},
 	},
 
-  {
-    "antosha417/nvim-lsp-file-operations",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-tree/nvim-tree.lua",
-    },
-    config = function()
-      require("lsp-file-operations").setup()
-    end,
-  },
-	
+	{
+		"antosha417/nvim-lsp-file-operations",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-tree/nvim-tree.lua",
+		},
+		config = function()
+			require("lsp-file-operations").setup()
+		end,
+	},
+
+	{
+		"levouh/tint.nvim",
+		config = function()
+			require("tint").setup({
+				tint = 0,
+				saturation = 0.1
+			})
+		end,
+	},
+	{
+		"gbprod/nord.nvim",
+		lazy = false,
+		priority = 1000,
+	},
+	{
+		"olimorris/onedarkpro.nvim",
+		priority = 1000, -- Ensure it loads first
+	},
+	{ "fcancelinha/nordern.nvim", branch = "master", priority = 1000 }
 })
 
 -- commands
 require("mappings")
 
 -- override
+vim.cmd [[colorscheme kanagawa]]
 vim.cmd [[highlight WinSeparator guifg=darkgray1]]
 
+vim.cmd [[autocmd VimEnter * silent! !prettierd restart]]
 vim.cmd [[autocmd VimEnter * silent! !prettierd restart]]
