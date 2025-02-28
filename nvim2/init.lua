@@ -433,6 +433,12 @@ require("lazy").setup({
 				return
 			end
 
+			local has_words_before = function()
+				unpack = unpack or table.unpack
+				local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+				return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
+			end
+
 			cmp.setup({
 				snippet = {
 					expand = function(args)
@@ -440,24 +446,42 @@ require("lazy").setup({
 					end,
 				},
 				window = {
-					completion = cmp.config.window.bordered(),
-					documentation = cmp.config.window.bordered(),
+					completion = {
+						winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,Search:None",
+						col_offset = -3,
+						side_padding = 0,
+					},
 				},
 				formatting = {
-					format = require("lspkind").cmp_format({
-						maxwidth = 50,   -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
-						ellipsis_char = "...", -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
+					fields = { "kind", "abbr", "menu" },
+					format = function(entry, vim_item)
+						local kind = require("lspkind").cmp_format({ mode = "symbol_text", maxwidth = 50 })(entry, vim_item)
+						local strings = vim.split(kind.kind, "%s", { trimempty = true })
+						kind.kind = " " .. (strings[1] or "") .. " "
+						kind.menu = "    (" .. (strings[2] or "") .. ")"
 
-						-- The function below will be called before any actual modifications from lspkind
-						-- so that you can provide more controls on popup customization. (See [#30](https://github.com/onsails/lspkind-nvim/pull/30))
-						before = function(entry, vim_item)
-							if entry.completion_item.detail ~= nil and entry.completion_item.detail ~= "" then
-								vim_item.menu = " " .. entry.completion_item.detail
-							end
-							return vim_item
-						end,
-					}),
+						return kind
+					end,
 				},
+				-- window = {
+				-- 	completion = cmp.config.window.bordered(),
+				-- 	documentation = cmp.config.window.bordered(),
+				-- },
+				-- formatting = {
+				-- 	format = require("lspkind").cmp_format({
+				-- 		maxwidth = 50,   -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
+				-- 		ellipsis_char = "...", -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
+
+				-- 		-- The function below will be called before any actual modifications from lspkind
+				-- 		-- so that you can provide more controls on popup customization. (See [#30](https://github.com/onsails/lspkind-nvim/pull/30))
+				-- 		before = function(entry, vim_item)
+				-- 			if entry.completion_item.detail ~= nil and entry.completion_item.detail ~= "" then
+				-- 				vim_item.menu = " " .. entry.completion_item.detail
+				-- 			end
+				-- 			return vim_item
+				-- 		end,
+				-- 	}),
+				-- },
 				mapping = cmp.mapping.preset.insert({
 					["<C-b>"] = cmp.mapping.scroll_docs(-4),
 					["<C-f>"] = cmp.mapping.scroll_docs(4),
@@ -469,18 +493,8 @@ require("lazy").setup({
 							cmp.confirm({ select = true })
 						elseif luasnip.expand_or_locally_jumpable() then -- locally makes it only jump when cursor gone back to the snippet region
 							luasnip.expand_or_jump()
-							-- elseif has_words_before() then
-							--   cmp.complete()
-						else
-							fallback()
-						end
-					end, { "i", "s" }),
-
-					["<S-Tab>"] = cmp.mapping(function(fallback)
-						if cmp.visible() then
-							cmp.select_prev_item()
-						elseif luasnip.jumpable(-1) then
-							luasnip.jump(-1)
+						elseif has_words_before() then
+							cmp.complete()
 						else
 							fallback()
 						end
@@ -493,6 +507,8 @@ require("lazy").setup({
 					{ name = "buffer" },
 				}),
 			})
+
+
 
 			-- Set configuration for specific filetype.
 			cmp.setup.filetype("gitcommit", {
@@ -550,8 +566,10 @@ require("lazy").setup({
 		"windwp/nvim-ts-autotag",
 		config = function()
 			require("nvim-ts-autotag").setup({
-				enable_rename = false,
-				enable_close_on_slash = false,
+				opts = {
+					enable_rename = false,
+					enable_close_on_slash = false,
+				}
 			})
 		end,
 	},
@@ -732,20 +750,21 @@ require("lazy").setup({
 		end,
 	},
 	{
-		"MunifTanjim/prettier.nvim",
-		dependencies = "jose-elias-alvarez/null-ls.nvim",
-		config = function()
-			require("prettier").setup({
-				bin = "prettierd",
-				filetypes = {
-					"json",
-					"javascript",
-					"javascriptreact",
-					"typescript",
-					"typescriptreact",
-				},
-			})
-		end,
+		'stevearc/conform.nvim',
+		opts = {
+			config = function()
+				require('conform').setup(
+					{
+						formatters_by_ft = {
+							lua = { "stylua" },
+							-- Conform will run the first available formatter
+							javascript = { "prettierd", "prettier", stop_after_first = true },
+						},
+					}
+				)
+				vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
+			end
+		},
 	},
 	{
 		"utilyre/barbecue.nvim",
@@ -770,16 +789,6 @@ require("lazy").setup({
 			require("lsp-file-operations").setup()
 		end,
 	},
-
-	{
-		"levouh/tint.nvim",
-		config = function()
-			require("tint").setup({
-				tint = 0,
-				saturation = 0.1
-			})
-		end,
-	},
 	{
 		"gbprod/nord.nvim",
 		lazy = false,
@@ -800,4 +809,52 @@ vim.cmd [[colorscheme kanagawa]]
 vim.cmd [[highlight WinSeparator guifg=darkgray1]]
 
 vim.cmd [[autocmd VimEnter * silent! !prettierd restart]]
-vim.cmd [[autocmd VimEnter * silent! !prettierd restart]]
+
+-- transparent background
+vim.cmd [[
+  highlight Normal ctermbg=none guibg=none
+  highlight NonText ctermbg=none guibg=none
+	highlight SignColumn ctermbg=none guibg=none
+]]
+
+-- Customization for Pmenu
+vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#282C34", fg = "NONE" })
+vim.api.nvim_set_hl(0, "Pmenu", { fg = "#C5CDD9", bg = "#22252A" })
+
+vim.api.nvim_set_hl(0, "CmpItemAbbrDeprecated", { fg = "#7E8294", bg = "NONE", strikethrough = true })
+vim.api.nvim_set_hl(0, "CmpItemAbbrMatch", { fg = "#82AAFF", bg = "NONE", bold = true })
+vim.api.nvim_set_hl(0, "CmpItemAbbrMatchFuzzy", { fg = "#82AAFF", bg = "NONE", bold = true })
+vim.api.nvim_set_hl(0, "CmpItemMenu", { fg = "#C792EA", bg = "NONE", italic = true })
+
+vim.api.nvim_set_hl(0, "CmpItemKindField", { fg = "#EED8DA", bg = "#B5585F" })
+vim.api.nvim_set_hl(0, "CmpItemKindProperty", { fg = "#EED8DA", bg = "#B5585F" })
+vim.api.nvim_set_hl(0, "CmpItemKindEvent", { fg = "#EED8DA", bg = "#B5585F" })
+
+vim.api.nvim_set_hl(0, "CmpItemKindText", { fg = "#C3E88D", bg = "#9FBD73" })
+vim.api.nvim_set_hl(0, "CmpItemKindEnum", { fg = "#C3E88D", bg = "#9FBD73" })
+vim.api.nvim_set_hl(0, "CmpItemKindKeyword", { fg = "#C3E88D", bg = "#9FBD73" })
+
+vim.api.nvim_set_hl(0, "CmpItemKindConstant", { fg = "#FFE082", bg = "#D4BB6C" })
+vim.api.nvim_set_hl(0, "CmpItemKindConstructor", { fg = "#FFE082", bg = "#D4BB6C" })
+vim.api.nvim_set_hl(0, "CmpItemKindReference", { fg = "#FFE082", bg = "#D4BB6C" })
+
+vim.api.nvim_set_hl(0, "CmpItemKindFunction", { fg = "#EADFF0", bg = "#A377BF" })
+vim.api.nvim_set_hl(0, "CmpItemKindStruct", { fg = "#EADFF0", bg = "#A377BF" })
+vim.api.nvim_set_hl(0, "CmpItemKindClass", { fg = "#EADFF0", bg = "#A377BF" })
+vim.api.nvim_set_hl(0, "CmpItemKindModule", { fg = "#EADFF0", bg = "#A377BF" })
+vim.api.nvim_set_hl(0, "CmpItemKindOperator", { fg = "#EADFF0", bg = "#A377BF" })
+
+vim.api.nvim_set_hl(0, "CmpItemKindVariable", { fg = "#C5CDD9", bg = "#7E8294" })
+vim.api.nvim_set_hl(0, "CmpItemKindFile", { fg = "#C5CDD9", bg = "#7E8294" })
+
+vim.api.nvim_set_hl(0, "CmpItemKindUnit", { fg = "#F5EBD9", bg = "#D4A959" })
+vim.api.nvim_set_hl(0, "CmpItemKindSnippet", { fg = "#F5EBD9", bg = "#D4A959" })
+vim.api.nvim_set_hl(0, "CmpItemKindFolder", { fg = "#F5EBD9", bg = "#D4A959" })
+
+vim.api.nvim_set_hl(0, "CmpItemKindMethod", { fg = "#DDE5F5", bg = "#6C8ED4" })
+vim.api.nvim_set_hl(0, "CmpItemKindValue", { fg = "#DDE5F5", bg = "#6C8ED4" })
+vim.api.nvim_set_hl(0, "CmpItemKindEnumMember", { fg = "#DDE5F5", bg = "#6C8ED4" })
+
+vim.api.nvim_set_hl(0, "CmpItemKindInterface", { fg = "#D8EEEB", bg = "#58B5A8" })
+vim.api.nvim_set_hl(0, "CmpItemKindColor", { fg = "#D8EEEB", bg = "#58B5A8" })
+vim.api.nvim_set_hl(0, "CmpItemKindTypeParameter", { fg = "#D8EEEB", bg = "#58B5A8" })

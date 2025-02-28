@@ -35,7 +35,7 @@ map { "n", "<leader>P", '"+]P' }
 -- map { "n", "p", "]p" }
 -- map { "n", "P", "]P" }
 
-map {'n','gw', '<c-w>w'}
+map { 'n', 'gw', '<c-w>w' }
 
 -- custom command
 vim.cmd "command -nargs=1 -bar STab :set shiftwidth=<args> tabstop=<args> softtabstop=<args>"
@@ -63,10 +63,23 @@ local hasEslint = function()
   return result
 end
 
+-- Format by conform
+vim.api.nvim_create_user_command("Format", function(args)
+  local range = nil
+  if args.count ~= -1 then
+    local end_line = vim.api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1]
+    range = {
+      start = { args.line1, 0 },
+      ["end"] = { args.line2, end_line:len() },
+    }
+  end
+  require("conform").format({ lsp_format = "fallback", range = range })
+end, { range = true })
+
 function _G.custom_format()
   if hasEslint() then
     vim.cmd 'EslintFixAll'
-    vim.cmd 'Prettier'
+    vim.cmd 'Format'
   else
     vim.lsp.buf.format({ async = true })
   end
@@ -115,5 +128,5 @@ map { "n", "ZA", "<cmd>qa!" }
 -- lsp
 map { 'n', 'gp', '<CMD>Glance definitions<CR>' }
 
-map {'o', 'm', ":<C-U>lua require('tsht').nodes()<CR>", {slient=true}}
-map {'x', 'm', ":lua require('tsht').nodes()<CR>", {slient=true}}
+map { 'o', 'm', ":<C-U>lua require('tsht').nodes()<CR>", { slient = true } }
+map { 'x', 'm', ":lua require('tsht').nodes()<CR>", { slient = true } }
