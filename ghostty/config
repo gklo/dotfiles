@@ -1,0 +1,29 @@
+# Font
+font-family = "JetBrainsMono NFM Regular"
+font-family-bold = "JetBrainsMono NFM Bold"
+font-family-italic = "JetBrainsMono NFM Italic"
+font-family-bold-italic = "JetBrainsMono NFM Bold Italic"
+font-size = 12
+font-thicken = true
+# font-thicken-strength = 128
+
+# behavior
+macos-option-as-alt = true
+
+# Appearance
+adjust-cell-width = -10%
+adjust-cell-height = 10%
+macos-titlebar-style = tabs
+background-opacity = 0.8
+background-blur = true
+split-divider-color = #555555
+
+# Keybind
+keybind = cmd+r=reload_config
+keybind = cmd+enter=new_split:auto
+keybind = cmd+s=goto_split:next
+keybind = cmd+shift+s=goto_split:previous
+keybind = cmd+z=toggle_split_zoom
+
+# Shell
+command = /opt/homebrew/bin/fish --login --interactive
