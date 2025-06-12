@@ -51,7 +51,9 @@ vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
 
 -- lsp
 local hasEslint = function()
-  local clients = vim.lsp.get_active_clients()
+  local clients = vim.lsp.get_clients({
+    bufnr = vim.api.nvim_get_current_buf()
+  })
   local result = false
 
   for _, x in pairs(clients) do
@@ -78,7 +80,7 @@ end, { range = true })
 
 function _G.custom_format()
   if hasEslint() then
-    vim.cmd 'EslintFixAll'
+    vim.cmd 'LspEslintFixAll'
     vim.cmd 'Format'
   else
     vim.lsp.buf.format({ async = true })

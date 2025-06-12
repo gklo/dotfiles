@@ -94,7 +94,7 @@ vim.o.foldnestmax = 1
 -- show pressed key
 vim.o.showcmd = true
 
-local osname = vim.loop.os_uname().sysname
+local osname = vim.uv.os_uname().sysname
 if string.find(osname, "Windows") then
 	vim.o.shell = "cmd"
 elseif vim.fn.executable("fish") then
@@ -128,18 +128,13 @@ vim.cmd("autocmd BufNewFile,BufRead *.js set filetype=javascriptreact")
 
 -- config lsp diagnostic
 vim.diagnostic.config({
-	virtual_text = {
-		severity = { min = vim.diagnostic.severity.WARN },
-	},
-})
-vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
-	-- Disable underline, it's very annoying
 	underline = false,
-	-- Enable virtual text, override spacing to 4
-	virtual_text = { spacing = 4 },
-	-- signs = true,
 	signs = false,
 	update_in_insert = false,
+	virtual_text = {
+		spacing = 4,
+		severity = { min = vim.diagnostic.severity.WARN },
+	},
 })
 
 -- autocomplete
@@ -311,26 +306,6 @@ require("lazy").setup({
 		"williamboman/mason-lspconfig.nvim",
 		dependencies = { "williamboman/mason.nvim" },
 		config = function()
-			local lspconfig = require("lspconfig")
-
-			require("mason").setup()
-			require("mason-lspconfig").setup({
-				ensure_installed = {
-					"tailwindcss",
-					"volar",
-					"sqlls",
-					"pyright",
-					"marksman",
-					"eslint",
-					"cssls",
-					"html",
-					"yamlls",
-					"jsonls",
-					"ts_ls",
-				},
-				automatic_installation = true,
-			})
-
 			local on_attach = function(client, bufnr)
 				local function buf_set_keymap(...)
 					vim.api.nvim_buf_set_keymap(bufnr, ...)
@@ -375,42 +350,46 @@ require("lazy").setup({
 				lineFoldingOnly = true,
 			}
 
-			-- setup lsp
-			require("mason-lspconfig").setup_handlers({
-				function(server_name) -- default handler (optional)
-					local opts = {
-						on_attach = on_attach,
-						capabilities = capabilities,
-						single_file_support = true,
-					}
+			vim.lsp.config('*', {
+				capabilities = capabilities,
+				on_attach = on_attach,
+				single_file_support = true
+			})
 
-					if server_name == "ts_ls" or server_name == "tailwindcss" then
-						opts.root_dir = function(fname)
-							return lspconfig.util.root_pattern(".git", "package.json", "tsconfig.json", "jsconfig.json")(
-								fname
-							) or vim.fn.getcwd()
-						end
-					elseif server_name == "lua_ls" then
-						opts.settings = {
-							Lua = {
-								runtime = {
-									version = "LuaJIT",
-								},
-								diagnostics = {
-									globals = {
-										"vim",
-										"require",
-									},
-								},
-								workspace = {
-									library = vim.api.nvim_get_runtime_file("", true),
-								},
+			vim.lsp.config("lua_ls", {
+				settings = {
+					Lua = {
+						runtime = {
+							version = "LuaJIT",
+						},
+						diagnostics = {
+							globals = {
+								"vim",
+								"require",
 							},
-						}
-					end
+						},
+						workspace = {
+							library = vim.api.nvim_get_runtime_file("", true),
+						},
+					},
+				}
+			})
 
-					require("lspconfig")[server_name].setup(opts)
-				end,
+			require("mason").setup()
+			require("mason-lspconfig").setup({
+				automatic_enable = true,
+				ensure_installed = {
+					"tailwindcss",
+					"sqlls",
+					"pyright",
+					"marksman",
+					"eslint",
+					"cssls",
+					"html",
+					"yamlls",
+					"jsonls",
+					"ts_ls",
+				},
 			})
 		end,
 	},
@@ -440,6 +419,15 @@ require("lazy").setup({
 			end
 
 			cmp.setup({
+				sorting = {
+					comparators = {
+						cmp.config.compare.exact,
+						cmp.config.compare.recently_used,
+						cmp.config.compare.length,
+						cmp.config.compare.offset,
+						cmp.config.compare.score,
+					},
+				},
 				snippet = {
 					expand = function(args)
 						require("luasnip").lsp_expand(args.body) -- For `luasnip` users.
@@ -455,33 +443,24 @@ require("lazy").setup({
 				formatting = {
 					fields = { "kind", "abbr", "menu" },
 					format = function(entry, vim_item)
-						local kind = require("lspkind").cmp_format({ mode = "symbol_text", maxwidth = 50 })(entry, vim_item)
+						local kind = require("lspkind").cmp_format({
+							mode = "symbol_text",
+							maxwidth = 50,
+							before = function(entry, vim_item)
+								if entry.completion_item.detail ~= nil and entry.completion_item.detail ~= "" then
+									vim_item.menu = " " .. entry.completion_item.detail
+								end
+								return vim_item
+							end,
+						})(entry, vim_item)
+
 						local strings = vim.split(kind.kind, "%s", { trimempty = true })
 						kind.kind = " " .. (strings[1] or "") .. " "
-						kind.menu = "    (" .. (strings[2] or "") .. ")"
+						-- kind.menu = "    (" .. (strings[2] or "") .. ")"
 
 						return kind
 					end,
 				},
-				-- window = {
-				-- 	completion = cmp.config.window.bordered(),
-				-- 	documentation = cmp.config.window.bordered(),
-				-- },
-				-- formatting = {
-				-- 	format = require("lspkind").cmp_format({
-				-- 		maxwidth = 50,   -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
-				-- 		ellipsis_char = "...", -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
-
-				-- 		-- The function below will be called before any actual modifications from lspkind
-				-- 		-- so that you can provide more controls on popup customization. (See [#30](https://github.com/onsails/lspkind-nvim/pull/30))
-				-- 		before = function(entry, vim_item)
-				-- 			if entry.completion_item.detail ~= nil and entry.completion_item.detail ~= "" then
-				-- 				vim_item.menu = " " .. entry.completion_item.detail
-				-- 			end
-				-- 			return vim_item
-				-- 		end,
-				-- 	}),
-				-- },
 				mapping = cmp.mapping.preset.insert({
 					["<C-b>"] = cmp.mapping.scroll_docs(-4),
 					["<C-f>"] = cmp.mapping.scroll_docs(4),
@@ -583,7 +562,8 @@ require("lazy").setup({
 				local api = require("nvim-tree.api")
 				api.config.mappings.default_on_attach(bufnr)
 				-- set no horizontal scroll
-				vim.api.nvim_exec("set mousescroll=hor:0", true)
+				vim.cmd([[set mousescroll=hor:0]])
+				-- vim.api.nvim_exec("set mousescroll=hor:0", true)
 			end,
 			hijack_cursor = true, -- keep cursor on the first letter
 			renderer = {
@@ -686,7 +666,7 @@ require("lazy").setup({
 		"pocco81/auto-save.nvim",
 		config = function()
 			require("auto-save").setup({
-				debounce_delay = 3000,
+				-- debounce_delay = 3000,
 			})
 		end,
 	},
@@ -757,8 +737,8 @@ require("lazy").setup({
 					{
 						formatters_by_ft = {
 							lua = { "stylua" },
-							-- Conform will run the first available formatter
-							javascript = { "prettierd", "prettier", stop_after_first = true },
+							javascriptreact = { "prettierd", "prettier" },
+							javascript = { "prettierd", "prettier" },
 						},
 					}
 				)
@@ -805,7 +785,7 @@ require("lazy").setup({
 require("mappings")
 
 -- override
-vim.cmd [[colorscheme kanagawa]]
+vim.cmd [[colorscheme tokyonight-moon]]
 vim.cmd [[highlight WinSeparator guifg=darkgray1]]
 
 vim.cmd [[autocmd VimEnter * silent! !prettierd restart]]
@@ -856,5 +836,7 @@ vim.api.nvim_set_hl(0, "CmpItemKindValue", { fg = "#DDE5F5", bg = "#6C8ED4" })
 vim.api.nvim_set_hl(0, "CmpItemKindEnumMember", { fg = "#DDE5F5", bg = "#6C8ED4" })
 
 vim.api.nvim_set_hl(0, "CmpItemKindInterface", { fg = "#D8EEEB", bg = "#58B5A8" })
+vim.api.nvim_set_hl(0, "CmpItemKindColor", { fg = "#D8EEEB", bg = "#58B5A8" })
+vim.api.nvim_set_hl(0, "CmpItemKindTypeParameter", { fg = "#D8EEEB", bg = "#58B5A8" })
 vim.api.nvim_set_hl(0, "CmpItemKindColor", { fg = "#D8EEEB", bg = "#58B5A8" })
 vim.api.nvim_set_hl(0, "CmpItemKindTypeParameter", { fg = "#D8EEEB", bg = "#58B5A8" })
