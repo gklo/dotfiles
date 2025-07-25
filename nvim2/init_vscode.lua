@@ -93,7 +93,7 @@ vim.o.wrap = false
 -- disable terminal numbers
 vim.cmd("autocmd TermOpen * setlocal nonumber norelativenumber")
 
-vim.api.nvim_set_keymap("n", "gr", '<cmd>call VSCodeNotify("references-view.findReferences")<CR>', {})
+vim.api.nvim_set_keymap("n", "gr", '<cmd>call VSCodeNotify("editor.action.goToReferences")<CR>', {})
 vim.api.nvim_set_keymap("n", "<leader>rn", '<cmd>call VSCodeNotify("editor.action.rename")<CR>', {})
 vim.api.nvim_set_keymap("n", "<leader>ff", '<cmd>call VSCodeNotify("workbench.action.quickOpen")<CR>', {})
 vim.api.nvim_set_keymap("n", "<leader>fg", '<cmd>call VSCodeNotify("workbench.action.findInFiles")<CR>', {})
@@ -105,6 +105,17 @@ vim.api.nvim_set_keymap(
 )
 vim.api.nvim_set_keymap("n", "<leader>ef", '<cmd>call VSCodeNotify("editor.action.formatDocument")<CR>', {})
 vim.api.nvim_set_keymap("x", "<leader>ef", '<cmd>call VSCodeNotify("editor.action.formatSelection")<CR>', {})
+
+-- grep
+vim.api.nvim_set_keymap("n", "<leader>fg", '<cmd>call VSCodeNotify("periscope.search")<CR>', {})
+
+-- close window
+vim.api.nvim_set_keymap("n", "ZZ", '<cmd>call VSCodeNotify("workbench.action.closeEditorsInGroup")<CR>', {})
+
+-- switch between windows
+vim.api.nvim_set_keymap("n", "gw", '<cmd>call VSCodeNotify("workbench.action.navigateEditorGroups")<CR>', {})
+
+
 
 require("paq")({
 	"savq/paq-nvim", -- Let Paq manage itself
@@ -134,6 +145,6 @@ require("nvim-treesitter.configs").setup({
 	},
 })
 
-vim.g.highlightedyank_highlight_duration = 300
+vim.g.highlightedyank_highlight_duration = 200
 
 vim.o.clipboard = "unnamedplus"

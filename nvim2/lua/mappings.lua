@@ -129,6 +129,17 @@ map { "n", "ZA", "<cmd>qa!" }
 
 -- lsp
 map { 'n', 'gp', '<CMD>Glance definitions<CR>' }
+map { "n", "gD", "<cmd>lua vim.lsp.buf.declaration()<cr>" }
+map { "n", "gd", "<cmd>Telescope lsp_definitions<cr>" }
+map { "n", "gi", "<cmd>lua vim.lsp.buf.implementation()<cr>" }
+map { "n", "gh", "<cmd>lua vim.diagnostic.open_float()<cr>" }
+map { "n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<cr>" }
+map { "n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<cr>" }
+
+map { "n", "gr", "<cmd>Telescope lsp_references<CR>" }
+map { "n", "gv", "<cmd>vsplit<CR><cmd>lua vim.lsp.buf.definition()<cr>" }
+map { "n", "H", "<cmd>lua vim.lsp.buf.hover()<cr>" }
+
 
 map { 'o', 'm', ":<C-U>lua require('tsht').nodes()<CR>", { slient = true } }
 map { 'x', 'm', ":lua require('tsht').nodes()<CR>", { slient = true } }

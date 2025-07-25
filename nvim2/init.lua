@@ -163,7 +163,7 @@ augroups.yankpost = {
 		event = "TextYankPost",
 		pattern = "*",
 		callback = function()
-			local cursor = vim.fn.getpos(".")
+			local cursor_pos = vim.fn.getpos(".")
 			if vim.v.event.operator == "y" then
 				vim.fn.setpos(".", cursor_pos)
 			end
@@ -192,7 +192,7 @@ vim.g.neovide_scroll_animation_length = 0.3
 
 -- lazy
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
 	vim.fn.system({
 		"git",
 		"clone",
@@ -313,16 +313,6 @@ require("lazy").setup({
 
 				local opts = { noremap = true, silent = true }
 
-				buf_set_keymap("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<cr>", opts)
-				buf_set_keymap("n", "gd", "<cmd>Telescope lsp_definitions<cr>", opts)
-				buf_set_keymap("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<cr>", opts)
-				buf_set_keymap("n", "gh", "<cmd>lua vim.diagnostic.open_float()<cr>", opts)
-				buf_set_keymap("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<cr>", opts)
-				buf_set_keymap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<cr>", opts)
-
-				buf_set_keymap("n", "gr", "<cmd>Telescope lsp_references<CR>", opts)
-				buf_set_keymap("n", "gv", "<cmd>vsplit<CR><cmd>lua vim.lsp.buf.definition()<cr>", opts)
-				buf_set_keymap("n", "H", "<cmd>lua vim.lsp.buf.hover()<cr>", opts)
 
 				-- highlight references
 				if client.server_capabilities.documenthighlightprovider then
@@ -408,6 +398,8 @@ require("lazy").setup({
 			local cmp = require("cmp")
 			local luasnip = require("luasnip")
 			local copilot = require("copilot.suggestion")
+			-- local codeium = require('codeium.virtual_text')
+
 			if cmp == nil then
 				return
 			end
@@ -421,11 +413,16 @@ require("lazy").setup({
 			cmp.setup({
 				sorting = {
 					comparators = {
-						cmp.config.compare.exact,
+						-- cmp.config.compare.exact,
+						-- cmp.config.compare.offset,
+						-- cmp.config.compare.score,
+						-- cmp.config.compare.recently_used,
+						-- cmp.config.compare.length,
+						cmp.config.compare.locality,
 						cmp.config.compare.recently_used,
-						cmp.config.compare.length,
+						cmp.config.compare.score, -- based on :  score = score + ((#sources - (source_index - 1)) * sorting.priority_weight)
 						cmp.config.compare.offset,
-						cmp.config.compare.score,
+						cmp.config.compare.order,
 					},
 				},
 				snippet = {
@@ -466,8 +463,10 @@ require("lazy").setup({
 					["<C-f>"] = cmp.mapping.scroll_docs(4),
 					["<CR>"] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
 					["<Tab>"] = cmp.mapping(function(fallback)
-						if copilot.is_visible() then
-							copilot.accept()
+						-- if codeium.status().state == "completions" then
+						-- 	fallback()
+							if copilot.is_visible() then
+								copilot.accept()
 						elseif cmp.visible() then
 							cmp.confirm({ select = true })
 						elseif luasnip.expand_or_locally_jumpable() then -- locally makes it only jump when cursor gone back to the snippet region
@@ -480,6 +479,7 @@ require("lazy").setup({
 					end, { "i", "s" }),
 				}),
 				sources = cmp.config.sources({
+					-- { name = "codeium" },
 					{ name = "nvim_lsp" },
 					{ name = "luasnip" }, -- For luasnip users.
 				}, {
@@ -558,6 +558,27 @@ require("lazy").setup({
 			"nvim-tree/nvim-web-devicons", -- optional
 		},
 		opts = {
+			view = {
+				float = {
+					enable = true,
+					open_win_config = function()
+						local screen_w = vim.opt.columns:get()
+						local screen_h = vim.opt.lines:get() - vim.opt.cmdheight:get()
+						local window_w = math.floor(screen_w * 0.8)
+						local window_h = math.floor(screen_h * 0.8)
+						return {
+							title = " NvimTree ",
+							title_pos = "center",
+							border = "rounded",
+							relative = "editor",
+							row = (screen_h - window_h) * 0.5,
+							col = (screen_w - window_w) * 0.5,
+							width = window_w,
+							height = window_h,
+						}
+					end,
+				}
+			},
 			on_attach = function(bufnr)
 				local api = require("nvim-tree.api")
 				api.config.mappings.default_on_attach(bufnr)
@@ -636,6 +657,21 @@ require("lazy").setup({
 			})
 		end,
 	},
+	-- {
+	-- 	"Exafunction/windsurf.nvim",
+	-- 	dependencies = {
+	-- 		"nvim-lua/plenary.nvim",
+	-- 		"hrsh7th/nvim-cmp",
+	-- 	},
+	-- 	config = function()
+	-- 		require("codeium").setup({
+	-- 			enable_cmp_source = false,
+	-- 			virtual_text = {
+	-- 				enabled = true,
+	-- 			}
+	-- 		})
+	-- 	end
+	-- },
 	{
 		"rmagatti/auto-session",
 		dependencies = "nvim-tree/nvim-tree.lua",
@@ -716,6 +752,9 @@ require("lazy").setup({
 				view_warn = "mini",
 				view = "mini",
 			},
+			notify = {
+				view = "mini",
+			}
 		},
 		dependencies = {
 			"MunifTanjim/nui.nvim",
@@ -769,15 +808,6 @@ require("lazy").setup({
 			require("lsp-file-operations").setup()
 		end,
 	},
-	{
-		"gbprod/nord.nvim",
-		lazy = false,
-		priority = 1000,
-	},
-	{
-		"olimorris/onedarkpro.nvim",
-		priority = 1000, -- Ensure it loads first
-	},
 	{ "fcancelinha/nordern.nvim", branch = "master", priority = 1000 }
 })
 
@@ -785,7 +815,7 @@ require("lazy").setup({
 require("mappings")
 
 -- override
-vim.cmd [[colorscheme tokyonight-moon]]
+vim.cmd [[colorscheme nordfox]]
 vim.cmd [[highlight WinSeparator guifg=darkgray1]]
 
 vim.cmd [[autocmd VimEnter * silent! !prettierd restart]]
