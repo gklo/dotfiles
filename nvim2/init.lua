@@ -1,3 +1,4 @@
+vim.env.PATH = vim.fn.system('fnm use 22 && echo $PATH')
 vim.g.mapleader = " "
 vim.o.hidden = true
 vim.o.backup = false
