@@ -1,5 +1,4 @@
 vim.g.mapleader = " "
-vim.o.hidden = true
 vim.o.backup = false
 vim.o.writebackup = false
 
@@ -42,16 +41,15 @@ vim.o.autoread = true
 vim.cmd("au CursorHold * checktime")
 
 -- fix backspace
-vim.o.backspace = "eol,start,indent"
-vim.o.magic = true
+vim.opt.backspace = { "eol", "start", "indent" }
 
 --faster response time
 vim.o.updatetime = 300
 -- Don't pass messages to |ins-completion-menu|.
-vim.o.shortmess = vim.o.shortmess .. "c"
+vim.opt.shortmess:append("c")
 
 -- set large redrawtime to make sure syntax highlight working all the time
-vim.o.rdt = 10000
+vim.o.redrawtime = 10000
 
 vim.o.foldnestmax = 1
 
@@ -63,7 +61,7 @@ vim.o.foldnestmax = 1
 -- show pressed key
 vim.o.showcmd = true
 
-local osname = vim.loop.os_uname().sysname
+local osname = vim.uv.os_uname().sysname
 if string.find(osname, "Windows") then
 	vim.o.shell = "cmd"
 elseif vim.fn.executable("fish") then
@@ -73,13 +71,11 @@ end
 vim.o.splitbelow = true
 vim.o.splitright = true
 
-vim.o.lsp = 2
-
 vim.o.title = true
 vim.o.titlestring = "%(%{expand('%:~:.:h')}%)\\%t"
 
 --fix newline at the end of file (causing git changes)
-vim.o.fixendofline = false
+vim.o.fixeol = false
 
 --hide the tilde characters on the blank lines
 --better diff looking
@@ -93,27 +89,27 @@ vim.o.wrap = false
 -- disable terminal numbers
 vim.cmd("autocmd TermOpen * setlocal nonumber norelativenumber")
 
-vim.api.nvim_set_keymap("n", "gr", '<cmd>call VSCodeNotify("editor.action.goToReferences")<CR>', {})
-vim.api.nvim_set_keymap("n", "<leader>rn", '<cmd>call VSCodeNotify("editor.action.rename")<CR>', {})
-vim.api.nvim_set_keymap("n", "<leader>ff", '<cmd>call VSCodeNotify("workbench.action.quickOpen")<CR>', {})
-vim.api.nvim_set_keymap("n", "<leader>fg", '<cmd>call VSCodeNotify("workbench.action.findInFiles")<CR>', {})
-vim.api.nvim_set_keymap(
+vim.keymap.set("n", "gr", '<cmd>call VSCodeNotify("editor.action.goToReferences")<CR>', {})
+vim.keymap.set("n", "<leader>rn", '<cmd>call VSCodeNotify("editor.action.rename")<CR>', {})
+vim.keymap.set("n", "<leader>ff", '<cmd>call VSCodeNotify("workbench.action.quickOpen")<CR>', {})
+vim.keymap.set("n", "<leader>fg", '<cmd>call VSCodeNotify("workbench.action.findInFiles")<CR>', {})
+vim.keymap.set(
 	"n",
 	"<leader>fb",
 	'<cmd>call VSCodeNotify("workbench.action.showAllEditorsByMostRecentlyUsed")<CR>',
 	{}
 )
-vim.api.nvim_set_keymap("n", "<leader>ef", '<cmd>call VSCodeNotify("editor.action.formatDocument")<CR>', {})
-vim.api.nvim_set_keymap("x", "<leader>ef", '<cmd>call VSCodeNotify("editor.action.formatSelection")<CR>', {})
+vim.keymap.set("n", "<leader>ef", '<cmd>call VSCodeNotify("editor.action.formatDocument")<CR>', {})
+vim.keymap.set("x", "<leader>ef", '<cmd>call VSCodeNotify("editor.action.formatSelection")<CR>', {})
 
 -- grep
-vim.api.nvim_set_keymap("n", "<leader>fg", '<cmd>call VSCodeNotify("periscope.search")<CR>', {})
+vim.keymap.set("n", "<leader>fg", '<cmd>call VSCodeNotify("periscope.search")<CR>', {})
 
 -- close window
-vim.api.nvim_set_keymap("n", "ZZ", '<cmd>call VSCodeNotify("workbench.action.closeEditorsInGroup")<CR>', {})
+vim.keymap.set("n", "ZZ", '<cmd>call VSCodeNotify("workbench.action.closeEditorsInGroup")<CR>', {})
 
 -- switch between windows
-vim.api.nvim_set_keymap("n", "gw", '<cmd>call VSCodeNotify("workbench.action.navigateEditorGroups")<CR>', {})
+vim.keymap.set("n", "gw", '<cmd>call VSCodeNotify("workbench.action.navigateEditorGroups")<CR>', {})
 
 
 
@@ -134,7 +130,7 @@ require("paq")({
 require("nvim-treesitter.configs").setup({
 	auto_install = true,
 	highlight = {
-		enabled = false,
+		enable = false,
 	},
 	incremental_selection = {
 		enable = true,
