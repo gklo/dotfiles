@@ -41,7 +41,7 @@ vim.o.autoread = true
 vim.cmd("au CursorHold * checktime")
 
 -- fix backspace
-vim.opt.backspace = {"eol", "start", "indent"}
+vim.opt.backspace = { "eol", "start", "indent" }
 
 -- faster response time
 vim.o.updatetime = 300
@@ -91,7 +91,7 @@ vim.cmd("autocmd TermOpen * setlocal nonumber norelativenumber")
 local augroups = {}
 augroups.yankpost = {
   save_cursor_position = {
-    event = {"VimEnter", "CursorMoved"},
+    event = { "VimEnter", "CursorMoved" },
     pattern = "*",
     callback = function()
       cursor_pos = vim.fn.getpos(".")
@@ -142,7 +142,6 @@ vim.keymap.set("n", "<leader>fb", '<cmd>call VSCodeNotify("workbench.action.show
 
 vim.keymap.set("n", "<leader>ef", function()
   vim.cmd('call VSCodeNotify("editor.action.formatDocument")')
-  vim.cmd('call VSCodeNotify("editor.action.organizeImports")')
   vim.cmd('call VSCodeNotify("eslint.executeAutofix")')
 end, {})
 
@@ -157,16 +156,16 @@ vim.keymap.set("n", "ZZ", '<cmd>call VSCodeNotify("workbench.action.closeEditors
 -- switch between windows
 vim.keymap.set("n", "gw", '<cmd>call VSCodeNotify("workbench.action.navigateEditorGroups")<CR>', {})
 
-require("paq")({"savq/paq-nvim", -- Let Paq manage itself
-"machakann/vim-sandwich", "tpope/vim-repeat", "nvim-treesitter/nvim-treesitter", "maxmellon/vim-jsx-pretty",
-                "JoosepAlviste/nvim-ts-context-commentstring", "sustech-data/wildfire.nvim"})
+require("paq")({ "savq/paq-nvim", -- Let Paq manage itself
+  "machakann/vim-sandwich", "tpope/vim-repeat", "nvim-treesitter/nvim-treesitter", "maxmellon/vim-jsx-pretty",
+  "JoosepAlviste/nvim-ts-context-commentstring", "sustech-data/wildfire.nvim" })
 
 require("wildfire").setup()
 -- native comment
 local get_option = vim.filetype.get_option
 vim.filetype.get_option = function(filetype, option)
   return option == "commentstring" and require("ts_context_commentstring.internal").calculate_commentstring() or
-           get_option(filetype, option)
+      get_option(filetype, option)
 end
 
 -- native yank highlight
@@ -178,9 +177,9 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   callback = function()
     vim.hl.on_yank({
       higroup = 'IncSearch', -- Highlight group to use (can change to 'Visual' or another)
-      timeout = 200, -- Duration in ms before highlight clears
-      on_macro = true, -- Highlight during macro execution (default: false)
-      on_visual = true -- Highlight visual selections (default: true)
+      timeout = 200,         -- Duration in ms before highlight clears
+      on_macro = true,       -- Highlight during macro execution (default: false)
+      on_visual = true       -- Highlight visual selections (default: true)
     })
   end
 })
