@@ -158,9 +158,8 @@ vim.keymap.set("n", "gw", '<cmd>call VSCodeNotify("workbench.action.navigateEdit
 
 require("paq")({ "savq/paq-nvim", -- Let Paq manage itself
   "machakann/vim-sandwich", "tpope/vim-repeat", "nvim-treesitter/nvim-treesitter", "maxmellon/vim-jsx-pretty",
-  "JoosepAlviste/nvim-ts-context-commentstring", "sustech-data/wildfire.nvim" })
+  "JoosepAlviste/nvim-ts-context-commentstring" })
 
-require("wildfire").setup()
 -- native comment
 local get_option = vim.filetype.get_option
 vim.filetype.get_option = function(filetype, option)
@@ -188,14 +187,14 @@ require("nvim-treesitter.configs").setup({
   auto_install = true,
   highlight = {
     enable = false
-  }
-  --[[ incremental_selection = {
+  },
+  incremental_selection = {
     enable = true,
     keymaps = {
       node_incremental = "v",
       node_decremental = "V"
     }
-  } ]]
+  }
 })
 
 vim.g.highlightedyank_highlight_duration = 200

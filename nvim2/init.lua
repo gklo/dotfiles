@@ -117,7 +117,7 @@ vim.o.pumheight = 10
 local augroups = {}
 augroups.yankpost = {
   save_cursor_position = {
-    event = {"VimEnter", "CursorMoved"},
+    event = { "VimEnter", "CursorMoved" },
     pattern = "*",
     callback = function()
       cursor_pos = vim.fn.getpos(".")
@@ -173,34 +173,37 @@ vim.g.neovide_scroll_animation_length = 0.3
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
   vim.fn.system(
-    {"git", "clone", "--filter=blob:none", "https://github.com/folke/lazy.nvim.git", "--branch=stable", -- latest stable release
-     lazypath})
+    { "git", "clone", "--filter=blob:none", "https://github.com/folke/lazy.nvim.git", "--branch=stable", -- latest stable release
+      lazypath })
 end
 vim.opt.rtp:prepend(lazypath)
 
-require("lazy").setup({"tpope/vim-repeat", "machakann/vim-sandwich", {
+-- native comment
+
+
+require("lazy").setup({ "tpope/vim-repeat", "machakann/vim-sandwich", {
   "notjedi/nvim-rooter.lua",
   config = function()
     require("nvim-rooter").setup({
-      rooter_patterns = {".git", ".hg", ".svn", "init.lua"},
-      trigger_patterns = {"*"}
+      rooter_patterns = { ".git", ".hg", ".svn", "init.lua" },
+      trigger_patterns = { "*" }
     })
   end
 }, -- colorscheme
-{
-  "folke/tokyonight.nvim",
-  config = function()
-    -- vim.cmd [[colorscheme tokyonight-storm]]
-    -- vim.cmd [[highlight WinSeparator guifg=grey]]
-  end
-}, {
+  {
+    "folke/tokyonight.nvim",
+    config = function()
+      -- vim.cmd [[colorscheme tokyonight-storm]]
+      -- vim.cmd [[highlight WinSeparator guifg=grey]]
+    end
+  }, {
   "tamton-aquib/staline.nvim",
   config = function()
     require("staline").setup({
       sections = {
-        left = {"cwd", "branch"},
+        left = { "cwd", "branch" },
         mid = {},
-        right = {"line_column"}
+        right = { "line_column" }
       },
       mode_colors = {
         i = "#d4be98",
@@ -216,131 +219,125 @@ require("lazy").setup({"tpope/vim-repeat", "machakann/vim-sandwich", {
     })
   end
 }, -- telescope
-{
-  "nvim-telescope/telescope.nvim",
-  dependencies = {{"nvim-lua/plenary.nvim"}},
-  config = function()
-    require("telescope").setup({
-      pickers = {
-        colorscheme = {
-          enable_preview = true
-        }
-      },
-      defaults = {
-        file_ignore_patterns = {".git", "node_modules", "vendor"},
-        layout_strategy = "vertical",
-        layout_config = {
-          vertical = {
-            preview_height = 0.6,
-            preview_cutoff = 1
+  {
+    "nvim-telescope/telescope.nvim",
+    dependencies = { { "nvim-lua/plenary.nvim" } },
+    config = function()
+      require("telescope").setup({
+        pickers = {
+          colorscheme = {
+            enable_preview = true
           }
-        }
-      }
-    })
-  end
-}, -- treesitter
-{
-  "nvim-treesitter/nvim-treesitter",
-  build = ":TSUpdate",
-  config = function()
-    require("nvim-treesitter.configs").setup({
-      auto_install = true,
-      highlight = {
-        enable = true
-      },
-      incremental_selection = {
-        enable = true,
-        keymaps = {
-          node_incremental = "v",
-          node_decremental = "V"
-        }
-      }
-    })
-  end
-}, {
-  "JoosepAlviste/nvim-ts-context-commentstring",
-  dependencies = {"tpope/vim-commentary"},
-  config = function()
-    require("ts_context_commentstring").setup({})
-  end
-}, -- lsp
-{
-  "williamboman/mason-lspconfig.nvim",
-  dependencies = {"williamboman/mason.nvim"},
-  config = function()
-    local on_attach = function(client, bufnr)
-      -- highlight references
-      if client.server_capabilities.documentHighlightProvider then
-        vim.api.nvim_create_augroup("lsp_document_highlight", {
-          clear = true
-        })
-        vim.api.nvim_clear_autocmds({
-          buffer = bufnr,
-          group = "lsp_document_highlight"
-        })
-        vim.api.nvim_create_autocmd("CursorHold", {
-          callback = vim.lsp.buf.document_highlight,
-          buffer = bufnr,
-          group = "lsp_document_highlight",
-          desc = "document highlight"
-        })
-        vim.api.nvim_create_autocmd("CursorMoved", {
-          callback = vim.lsp.buf.clear_references,
-          buffer = bufnr,
-          group = "lsp_document_highlight",
-          desc = "clear all the references"
-        })
-      end
-    end
-
-    -- capabilities
-    local capabilities = require("cmp_nvim_lsp").default_capabilities()
-    capabilities.textDocument.foldingRange = {
-      dynamicRegistration = false,
-      lineFoldingOnly = true
-    }
-
-    local lspconfig = require("lspconfig")
-    local servers = {"tailwindcss", "sqlls", "pyright", "marksman", "eslint", "cssls", "html", "yamlls", "jsonls",
-                     "ts_ls", "lua_ls"}
-
-    for _, server in ipairs(servers) do
-      local opts = {
-        capabilities = capabilities,
-        on_attach = on_attach,
-        single_file_support = true
-      }
-
-      if server == "lua_ls" then
-        opts.settings = {
-          Lua = {
-            runtime = {
-              version = "LuaJIT"
-            },
-            diagnostics = {
-              globals = {"vim", "require"}
-            },
-            workspace = {
-              library = vim.api.nvim_get_runtime_file("", true)
+        },
+        defaults = {
+          file_ignore_patterns = { ".git", "node_modules", "vendor" },
+          layout_strategy = "vertical",
+          layout_config = {
+            vertical = {
+              preview_height = 0.6,
+              preview_cutoff = 1
             }
           }
         }
+      })
+    end
+  }, -- treesitter
+  {
+    "nvim-treesitter/nvim-treesitter",
+    build = ":TSUpdate",
+    config = function()
+      require("nvim-treesitter.configs").setup({
+        auto_install = true,
+        highlight = {
+          enable = true
+        },
+        incremental_selection = {
+          enable = true,
+          keymaps = {
+            node_incremental = "v",
+            node_decremental = "V"
+          }
+        }
+      })
+    end
+  },
+  -- lsp
+  {
+    "williamboman/mason-lspconfig.nvim",
+    dependencies = { "williamboman/mason.nvim" },
+    config = function()
+      local on_attach = function(client, bufnr)
+        -- highlight references
+        if client.server_capabilities.documentHighlightProvider then
+          vim.api.nvim_create_augroup("lsp_document_highlight", {
+            clear = true
+          })
+          vim.api.nvim_clear_autocmds({
+            buffer = bufnr,
+            group = "lsp_document_highlight"
+          })
+          vim.api.nvim_create_autocmd("CursorHold", {
+            callback = vim.lsp.buf.document_highlight,
+            buffer = bufnr,
+            group = "lsp_document_highlight",
+            desc = "document highlight"
+          })
+          vim.api.nvim_create_autocmd("CursorMoved", {
+            callback = vim.lsp.buf.clear_references,
+            buffer = bufnr,
+            group = "lsp_document_highlight",
+            desc = "clear all the references"
+          })
+        end
       end
 
-      lspconfig[server].setup(opts)
-    end
+      -- capabilities
+      local capabilities = require("cmp_nvim_lsp").default_capabilities()
+      capabilities.textDocument.foldingRange = {
+        dynamicRegistration = false,
+        lineFoldingOnly = true
+      }
 
-    require("mason").setup()
-    require("mason-lspconfig").setup({
-      automatic_enable = true,
-      ensure_installed = {"tailwindcss", "sqlls", "pyright", "marksman", "eslint", "cssls", "html", "yamlls", "jsonls",
-                          "ts_ls"}
-    })
-  end
-}, "neovim/nvim-lspconfig", {
+      local lspconfig = require("lspconfig")
+      local servers = { "tailwindcss", "sqlls", "pyright", "marksman", "eslint", "cssls", "html", "yamlls", "jsonls",
+        "lua_ls" }
+
+      for _, server in ipairs(servers) do
+        local opts = {
+          capabilities = capabilities,
+          on_attach = on_attach,
+          single_file_support = true
+        }
+
+        if server == "lua_ls" then
+          opts.settings = {
+            Lua = {
+              runtime = {
+                version = "LuaJIT"
+              },
+              diagnostics = {
+                globals = { "vim", "require" }
+              },
+              workspace = {
+                library = vim.api.nvim_get_runtime_file("", true)
+              }
+            }
+          }
+        end
+
+        lspconfig[server].setup(opts)
+      end
+
+      require("mason").setup()
+      require("mason-lspconfig").setup({
+        automatic_enable = true,
+        ensure_installed = { "tailwindcss", "sqlls", "pyright", "marksman", "eslint", "cssls", "html", "yamlls", "jsonls" }
+      })
+    end
+  }, "neovim/nvim-lspconfig", {
   "hrsh7th/nvim-cmp",
-  dependencies = {"hrsh7th/cmp-nvim-lsp", "hrsh7th/cmp-buffer", "hrsh7th/cmp-path", "hrsh7th/cmp-cmdline",
-                  "onsails/lspkind.nvim", "zbirenbaum/copilot.lua"},
+  dependencies = { "hrsh7th/cmp-nvim-lsp", "hrsh7th/cmp-buffer", "hrsh7th/cmp-path", "hrsh7th/cmp-cmdline",
+    "onsails/lspkind.nvim", "zbirenbaum/copilot.lua" },
   config = function()
     local cmp = require("cmp")
     local luasnip = require("luasnip")
@@ -371,7 +368,7 @@ require("lazy").setup({"tpope/vim-repeat", "machakann/vim-sandwich", {
         }
       },
       formatting = {
-        fields = {"kind", "abbr", "menu"},
+        fields = { "kind", "abbr", "menu" },
         format = function(entry, vim_item)
           local kind = require("lspkind").cmp_format({
             mode = "symbol_text",
@@ -415,45 +412,45 @@ require("lazy").setup({"tpope/vim-repeat", "machakann/vim-sandwich", {
           else
             fallback()
           end
-        end, {"i", "s"})
+        end, { "i", "s" })
       }),
       sources = cmp.config.sources({ -- { name = "codeium" },
-      {
-        name = "nvim_lsp"
-      }, {
+        {
+          name = "nvim_lsp"
+        }, {
         name = "luasnip"
       } -- For luasnip users.
-      }, {{
+      }, { {
         name = "buffer"
-      }})
+      } })
     })
 
     -- Set configuration for specific filetype.
     cmp.setup.filetype("gitcommit", {
-      sources = cmp.config.sources({{
+      sources = cmp.config.sources({ {
         name = "cmp_git"
       } -- You can specify the `cmp_git` source if you were installed it.
-      }, {{
+      }, { {
         name = "buffer"
-      }})
+      } })
     })
 
     -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
-    cmp.setup.cmdline({"/", "?"}, {
+    cmp.setup.cmdline({ "/", "?" }, {
       mapping = cmp.mapping.preset.cmdline(),
-      sources = {{
+      sources = { {
         name = "buffer"
-      }}
+      } }
     })
 
     -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
     cmp.setup.cmdline(":", {
       mapping = cmp.mapping.preset.cmdline(),
-      sources = cmp.config.sources({{
+      sources = cmp.config.sources({ {
         name = "path"
-      }}, {{
+      } }, { {
         name = "cmdline"
-      }})
+      } })
     })
   end
 }, {
@@ -487,7 +484,7 @@ require("lazy").setup({"tpope/vim-repeat", "machakann/vim-sandwich", {
   end
 }, {
   "nvim-tree/nvim-tree.lua",
-  dependencies = {"nvim-tree/nvim-web-devicons" -- optional
+  dependencies = { "nvim-tree/nvim-web-devicons" -- optional
   },
   opts = {
     view = {
@@ -543,7 +540,7 @@ require("lazy").setup({"tpope/vim-repeat", "machakann/vim-sandwich", {
       show_on_dirs = true
     },
     filters = {
-      custom = {"^.git$", "^.github$"}
+      custom = { "^.git$", "^.github$" }
     },
     actions = {
       change_dir = {
@@ -552,14 +549,14 @@ require("lazy").setup({"tpope/vim-repeat", "machakann/vim-sandwich", {
       }
     }
   }
-}, {"maxmellon/vim-jsx-pretty"}, {
+}, { "maxmellon/vim-jsx-pretty" }, {
   "NMAC427/guess-indent.nvim",
   config = function()
     require("guess-indent").setup({})
   end
 }, {
   "shellRaining/hlchunk.nvim",
-  event = {"UIEnter"},
+  event = { "UIEnter" },
   config = function()
     require("hlchunk").setup({
       blank = {
@@ -592,10 +589,10 @@ require("lazy").setup({"tpope/vim-repeat", "machakann/vim-sandwich", {
     -- end
     require("auto-session").setup({
       log_level = "error",
-      auto_session_suppress_dirs = {"~/", "~/Projects", "~/Downloads", "/"},
-      bypass_session_save_file_types = {"NvimTree"},
+      auto_session_suppress_dirs = { "~/", "~/Projects", "~/Downloads", "/" },
+      bypass_session_save_file_types = { "NvimTree" },
       -- fix nvim-tree
-      pre_save_cmds = {close_nvim_tree}
+      pre_save_cmds = { close_nvim_tree }
     })
   end
 }, {
@@ -616,13 +613,13 @@ require("lazy").setup({"tpope/vim-repeat", "machakann/vim-sandwich", {
     vim.g.suda_smart_edit = true
   end
 }, -- Lua
-{
-  "0oAstro/dim.lua",
-  dependencies = {"nvim-treesitter/nvim-treesitter", "neovim/nvim-lspconfig"},
-  config = function()
-    require("dim").setup()
-  end
-}, { -- peek definition
+  {
+    "0oAstro/dim.lua",
+    dependencies = { "nvim-treesitter/nvim-treesitter", "neovim/nvim-lspconfig" },
+    config = function()
+      require("dim").setup()
+    end
+  }, { -- peek definition
   "dnlhc/glance.nvim",
   event = "VeryLazy",
   config = function()
@@ -655,7 +652,7 @@ require("lazy").setup({"tpope/vim-repeat", "machakann/vim-sandwich", {
       view = "mini"
     }
   },
-  dependencies = {"MunifTanjim/nui.nvim", "rcarriga/nvim-notify"}
+  dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify" }
 }, {
   "EdenEast/nightfox.nvim",
   lazy = false,
@@ -668,9 +665,9 @@ require("lazy").setup({"tpope/vim-repeat", "machakann/vim-sandwich", {
     config = function()
       require('conform').setup({
         formatters_by_ft = {
-          lua = {"stylua"},
-          javascriptreact = {"prettierd", "prettier"},
-          javascript = {"prettierd", "prettier"}
+          lua = { "stylua" },
+          javascriptreact = { "prettierd", "prettier" },
+          javascript = { "prettierd", "prettier" }
         }
       })
       vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
@@ -680,14 +677,14 @@ require("lazy").setup({"tpope/vim-repeat", "machakann/vim-sandwich", {
   "utilyre/barbecue.nvim",
   name = "barbecue",
   version = "*",
-  dependencies = {"SmiteshP/nvim-navic", "nvim-tree/nvim-web-devicons" -- optional dependency
+  dependencies = { "SmiteshP/nvim-navic", "nvim-tree/nvim-web-devicons" -- optional dependency
   },
   opts = {
     -- configurations go here
   }
 }, {
   "antosha417/nvim-lsp-file-operations",
-  dependencies = {"nvim-lua/plenary.nvim", "nvim-tree/nvim-tree.lua"},
+  dependencies = { "nvim-lua/plenary.nvim", "nvim-tree/nvim-tree.lua" },
   config = function()
     require("lsp-file-operations").setup()
   end
@@ -697,15 +694,29 @@ require("lazy").setup({"tpope/vim-repeat", "machakann/vim-sandwich", {
   priority = 1000
 }, {
   "CopilotC-Nvim/CopilotChat.nvim",
-  dependencies = {{
+  dependencies = {
     "nvim-lua/plenary.nvim",
     branch = "master"
-  }},
+  },
   build = "make tiktoken",
-  opts = {
-    -- See Configuration section for options
-  }
-}})
+  opts = {},
+}, {
+  "pmizio/typescript-tools.nvim",
+  dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+  opts = {},
+}, {
+  "JoosepAlviste/nvim-ts-context-commentstring",
+  config = function()
+    require("ts_context_commentstring").setup()
+    -- native comment
+    local get_option = vim.filetype.get_option
+    vim.filetype.get_option = function(filetype, option)
+      return option == "commentstring" and require("ts_context_commentstring.internal").calculate_commentstring() or
+          get_option(filetype, option)
+    end
+  end
+}
+})
 
 -- commands
 require("mappings")
