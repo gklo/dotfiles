@@ -80,7 +80,7 @@ end, { range = true })
 
 function _G.custom_format()
   if hasEslint() then
-    vim.cmd 'LspEslintFixAll'
+    vim.cmd 'EslintFixAll'
     vim.cmd 'Format'
   else
     vim.lsp.buf.format({ async = true })
