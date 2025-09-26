@@ -148,7 +148,7 @@ end, {})
 vim.keymap.set("x", "<leader>ef", '<cmd>call VSCodeNotify("editor.action.formatSelection")<CR>', {})
 
 -- grep
-vim.keymap.set("n", "<leader>fg", '<cmd>call VSCodeNotify("periscope.search")<CR>', {})
+vim.keymap.set("n", "<leader>fg", '<cmd>call VSCodeNotify("periscope.resumeSearch")<CR>', {})
 
 -- close window
 vim.keymap.set("n", "ZZ", '<cmd>call VSCodeNotify("workbench.action.closeEditorsInGroup")<CR>', {})

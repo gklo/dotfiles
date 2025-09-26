@@ -1,9 +1,9 @@
 # Font
-font-family = "JetBrainsMono NFM Regular"
-font-family-bold = "JetBrainsMono NFM Bold"
-font-family-italic = "JetBrainsMono NFM Italic"
-font-family-bold-italic = "JetBrainsMono NFM Bold Italic"
-font-size = 12
+font-family = "0xProto Regular"
+font-family-bold = "0xProto Bold"
+font-family-italic = "0xProto Italic"
+# font-family-bold-italic = "JetBrainsMono NFM Bold Italic"
+font-size = 13
 font-thicken = true
 # font-thicken-strength = 128
 
@@ -14,9 +14,10 @@ macos-option-as-alt = true
 adjust-cell-width = -10%
 adjust-cell-height = 10%
 macos-titlebar-style = tabs
-background-opacity = 0.8
+background-opacity = 0.5
 background-blur = true
 split-divider-color = #555555
+unfocused-split-opacity = 0.3
 
 # Keybind
 keybind = cmd+r=reload_config
