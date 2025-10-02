@@ -1,5 +1,0 @@
-set mouse=a
-"let vimpager_use_gvim=1
-
-vnoremap <silent> * :call VisualSelection('f')<CR>
-vnoremap <silent> # :call VisualSelection('b')<CR>

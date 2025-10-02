@@ -1,8 +1,0 @@
-set previewer ~/.config/lf/lf_kitty_preview
-set cleaner ~/.config/lf/lf_kitty_clean
-set drawbox
-set sortby time
-set info time
-set reverse
-set icons
-map x delete
