@@ -298,7 +298,6 @@ require("lazy").setup({ "tpope/vim-repeat", "machakann/vim-sandwich", {
         lineFoldingOnly = true
       }
 
-      local lspconfig = require("lspconfig")
       local servers = { "tailwindcss", "sqlls", "pyright", "marksman", "eslint", "cssls", "html", "yamlls", "jsonls",
         "lua_ls" }
 
@@ -325,7 +324,7 @@ require("lazy").setup({ "tpope/vim-repeat", "machakann/vim-sandwich", {
           }
         end
 
-        lspconfig[server].setup(opts)
+        vim.lsp.config(server, opts)
       end
 
       require("mason").setup()
