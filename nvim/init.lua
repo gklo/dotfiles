@@ -19,7 +19,6 @@ vim.opt.fillchars:append({
   eob = " ",
   diff = "╱"
 })
-
 -- Editing and indentation
 vim.o.tabstop = 2
 vim.o.shiftwidth = 2
@@ -95,7 +94,7 @@ augroups.yankpost = {
     event = "TextYankPost",
     pattern = "*",
     callback = function()
-      vim.highlight.on_yank({
+      vim.hl.on_yank({
         higroup = "IncSearch",
         timeout = 200,
         on_visual = true
@@ -141,21 +140,21 @@ if not vim.uv.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-require("lazy").setup({ "tpope/vim-repeat", "machakann/vim-sandwich", {
-  "notjedi/nvim-rooter.lua",
-  config = function()
-    require("nvim-rooter").setup({
-      rooter_patterns = { ".git", ".hg", ".svn", "init.lua" },
-      trigger_patterns = { "*" }
-    })
-  end
-}, -- colorscheme
+require("lazy").setup({
+  "tpope/vim-repeat",
+  "machakann/vim-sandwich",
+  {
+    "notjedi/nvim-rooter.lua",
+    config = function()
+      require("nvim-rooter").setup({
+        rooter_patterns = { ".git", ".hg", ".svn", "init.lua" },
+        trigger_patterns = { "*" }
+      })
+    end
+  },
   {
     "folke/tokyonight.nvim",
-    config = function()
-      -- vim.cmd [[colorscheme tokyonight-storm]]
-      -- vim.cmd [[highlight WinSeparator guifg=grey]]
-    end
+    opts = {}
   },
   {
     "tamton-aquib/staline.nvim",
@@ -251,15 +250,20 @@ require("lazy").setup({ "tpope/vim-repeat", "machakann/vim-sandwich", {
         end
       end
 
-      -- capabilities
-      local capabilities = require("cmp_nvim_lsp").default_capabilities()
-      capabilities.textDocument.foldingRange = {
-        dynamicRegistration = false,
-        lineFoldingOnly = true
-      }
-
       local servers = { "tailwindcss", "sqlls", "pyright", "marksman", "eslint", "cssls", "html", "yamlls", "jsonls",
         "lua_ls" }
+
+
+      local capabilities = {
+        textDocument = {
+          foldingRange = {
+            dynamicRegistration = false,
+            lineFoldingOnly = true
+          }
+        }
+      }
+
+      capabilities = require('blink.cmp').get_lsp_capabilities(capabilities)
 
       for _, server in ipairs(servers) do
         local opts = {
@@ -293,146 +297,56 @@ require("lazy").setup({ "tpope/vim-repeat", "machakann/vim-sandwich", {
         ensure_installed = { "tailwindcss", "sqlls", "pyright", "marksman", "eslint", "cssls", "html", "yamlls", "jsonls" }
       })
     end
-  }, "neovim/nvim-lspconfig", {
-  "hrsh7th/nvim-cmp",
-  dependencies = { "hrsh7th/cmp-nvim-lsp", "hrsh7th/cmp-buffer", "hrsh7th/cmp-path", "hrsh7th/cmp-cmdline",
-    "onsails/lspkind.nvim", "zbirenbaum/copilot.lua" },
-  config = function()
-    local cmp = require("cmp")
-    local luasnip = require("luasnip")
-    local copilot = require("copilot.suggestion")
-    -- local codeium = require('codeium.virtual_text')
-
-    if cmp == nil then
-      return
-    end
-
-    local has_words_before = function()
-      unpack = unpack or table.unpack
-      local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-      return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
-    end
-
-    cmp.setup({
-      snippet = {
-        expand = function(args)
-          require("luasnip").lsp_expand(args.body) -- For `luasnip` users.
-        end
-      },
-      window = {
-        completion = {
-          winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,Search:None",
-          col_offset = -3,
-          side_padding = 0
-        }
-      },
-      formatting = {
-        fields = { "kind", "abbr", "menu" },
-        format = function(entry, vim_item)
-          local kind = require("lspkind").cmp_format({
-            mode = "symbol_text",
-            maxwidth = 50,
-            before = function(entry, vim_item)
-              if entry.completion_item.detail ~= nil and entry.completion_item.detail ~= "" then
-                vim_item.menu = " " .. entry.completion_item.detail
-              end
-              return vim_item
-            end
-          })(entry, vim_item)
-
-          local strings = vim.split(kind.kind, "%s", {
-            trimempty = true
-          })
-          kind.kind = " " .. (strings[1] or "") .. " "
-          -- kind.menu = "    (" .. (strings[2] or "") .. ")"
-
-          return kind
-        end
-      },
-      mapping = cmp.mapping.preset.insert({
-        ["<C-b>"] = cmp.mapping.scroll_docs(-4),
-        ["<C-f>"] = cmp.mapping.scroll_docs(4),
-        ["<CR>"] = cmp.mapping.confirm({
-          select = false
-        }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-        ["<Tab>"] = cmp.mapping(function(fallback)
-          -- if codeium.status().state == "completions" then
-          -- 	fallback()
-          if copilot.is_visible() then
-            copilot.accept()
-          elseif cmp.visible() then
-            cmp.confirm({
-              select = true
-            })
-          elseif luasnip.expand_or_locally_jumpable() then -- locally makes it only jump when cursor gone back to the snippet region
-            luasnip.expand_or_jump()
-          elseif has_words_before() then
-            cmp.complete()
-          else
-            fallback()
-          end
-        end, { "i", "s" })
-      }),
-      sources = cmp.config.sources({ -- { name = "codeium" },
-          {
-            name = "nvim_lsp"
-          },
-          {
-            name = "luasnip"
-          } -- For luasnip users.
-        },
-        { {
-          name = "buffer"
-        } })
-    })
-
-    -- Set configuration for specific filetype.
-    cmp.setup.filetype("gitcommit", {
-      sources = cmp.config.sources({ {
-          name = "cmp_git"
-        } -- You can specify the `cmp_git` source if you were installed it.
-        },
-        { {
-          name = "buffer"
-        } })
-    })
-
-    -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
-    cmp.setup.cmdline({ "/", "?" },
-      {
-        mapping = cmp.mapping.preset.cmdline(),
-        sources = { {
-          name = "buffer"
-        } }
-      })
-
-    -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
-    cmp.setup.cmdline(":", {
-      mapping = cmp.mapping.preset.cmdline(),
-      sources = cmp.config.sources({ {
-          name = "path"
-        } },
-        { {
-          name = "cmdline"
-        } })
-    })
-  end
-},
+  },
+  "neovim/nvim-lspconfig",
   {
-    "L3MON4D3/LuaSnip",
+    'saghen/blink.cmp',
+    version = '1.*',
+    opts = {
+      keymap = {
+        preset = 'default',
+        ["<Tab>"] = {
+          "snippet_forward",
+          function() -- sidekick next edit suggestion
+            return require("sidekick").nes_jump_or_apply()
+          end,
+          "accept",
+          function()
+            if require("copilot.suggestion").is_visible() then
+              return require("copilot.suggestion").accept()
+            end
+          end,
+          "fallback",
+        },
+      },
+
+      appearance = {
+        nerd_font_variant = 'mono'
+      },
+
+      completion = {
+        documentation = { auto_show = true },
+      },
+
+      sources = {
+        default = { 'lsp', 'path', 'snippets', 'buffer' },
+      },
+
+      fuzzy = { implementation = "prefer_rust_with_warning" },
+
+    },
+    opts_extend = { "sources.default" }
+  },
+  {
+    "yamatsum/nvim-cursorline",
     config = function()
-      require("luasnip.loaders.from_vscode").lazy_load()
+      require("nvim-cursorline").setup({
+        cursorline = {
+          timeout = 300
+        }
+      })
     end
-  }, "saadparwaiz1/cmp_luasnip", "johngrib/vim-game-code-break", {
-  "yamatsum/nvim-cursorline",
-  config = function()
-    require("nvim-cursorline").setup({
-      cursorline = {
-        timeout = 300
-      }
-    })
-  end
-},
+  },
   {
     "windwp/nvim-autopairs",
     config = function()
@@ -441,19 +355,16 @@ require("lazy").setup({ "tpope/vim-repeat", "machakann/vim-sandwich", {
   },
   {
     "windwp/nvim-ts-autotag",
-    config = function()
-      require("nvim-ts-autotag").setup({
-        opts = {
-          enable_rename = false,
-          enable_close_on_slash = false
-        }
-      })
-    end
+    opts = {
+      opts = {
+        enable_rename = false,
+        enable_close_on_slash = false
+      }
+    }
   },
   {
     "nvim-tree/nvim-tree.lua",
-    dependencies = { "nvim-tree/nvim-web-devicons" -- optional
-    },
+    dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {
       view = {
         float = {
@@ -518,12 +429,10 @@ require("lazy").setup({ "tpope/vim-repeat", "machakann/vim-sandwich", {
       }
     }
   },
-  { "maxmellon/vim-jsx-pretty" },
+  "maxmellon/vim-jsx-pretty",
   {
     "NMAC427/guess-indent.nvim",
-    config = function()
-      require("guess-indent").setup({})
-    end
+    opts = {}
   },
   {
     "shellRaining/hlchunk.nvim",
@@ -541,25 +450,23 @@ require("lazy").setup({ "tpope/vim-repeat", "machakann/vim-sandwich", {
   },
   {
     "zbirenbaum/copilot.lua",
-    config = function()
-      require("copilot").setup({
-        suggestion = {
-          auto_trigger = true
-        }
-      })
-    end
+    dependencies = {
+      "copilotlsp-nvim/copilot-lsp", -- (optional) for NES functionality
+    },
+    opts = {
+      suggestion = {
+        auto_trigger = true
+      }
+    }
   },
   {
     "rmagatti/auto-session",
-    dependencies = "nvim-tree/nvim-tree.lua",
+    dependencies = { "nvim-tree/nvim-tree.lua" },
     config = function()
       local api = require("nvim-tree.api")
       local function close_nvim_tree()
         api.tree.close()
       end
-      -- local function open_nvim_tree()
-      --   api.tree.open()
-      -- end
       require("auto-session").setup({
         log_level = "error",
         auto_session_suppress_dirs = { "~/", "~/Projects", "~/Downloads", "/" },
@@ -571,17 +478,13 @@ require("lazy").setup({ "tpope/vim-repeat", "machakann/vim-sandwich", {
   },
   {
     "rebelot/kanagawa.nvim",
-    config = function()
-      -- vim.cmd [[colorscheme kanagawa]]
-    end
+    opts = {}
   },
   {
     "pocco81/auto-save.nvim",
-    config = function()
-      require("auto-save").setup({
-        -- debounce_delay = 3000,
-      })
-    end
+    opts = {
+      -- debounce_delay = 3000,
+    }
   },
   {
     "lambdalisue/suda.vim",
@@ -592,24 +495,18 @@ require("lazy").setup({ "tpope/vim-repeat", "machakann/vim-sandwich", {
   {
     "0oAstro/dim.lua",
     dependencies = { "nvim-treesitter/nvim-treesitter", "neovim/nvim-lspconfig" },
-    config = function()
-      require("dim").setup()
-    end
+    opts = {}
   },
   { -- peek definition
     "dnlhc/glance.nvim",
     event = "VeryLazy",
-    config = function()
-      require("glance").setup({
-        -- your configuration
-      })
-    end
+    opts = {
+      -- your configuration
+    }
   },
   { -- keep cursor in place after > or =
     "gbprod/stay-in-place.nvim",
-    config = function()
-      require("stay-in-place").setup()
-    end
+    opts = {}
   },
   {
     "AlexvZyl/nordic.nvim",
@@ -669,9 +566,7 @@ require("lazy").setup({ "tpope/vim-repeat", "machakann/vim-sandwich", {
   {
     "antosha417/nvim-lsp-file-operations",
     dependencies = { "nvim-lua/plenary.nvim", "nvim-tree/nvim-tree.lua" },
-    config = function()
-      require("lsp-file-operations").setup()
-    end
+    opts = {}
   },
   {
     "fcancelinha/nordern.nvim",
@@ -694,6 +589,66 @@ require("lazy").setup({ "tpope/vim-repeat", "machakann/vim-sandwich", {
             get_option(filetype, option)
       end
     end
+  },
+  {
+    "folke/sidekick.nvim",
+    opts = {},
+    -- stylua: ignore
+    keys = {
+      {
+        "<tab>",
+        function()
+          -- if there is a next edit, jump to it, otherwise apply it if any
+          if not require("sidekick").nes_jump_or_apply() then
+            return "<Tab>" -- fallback to normal tab
+          end
+        end,
+        expr = true,
+        desc = "Goto/Apply Next Edit Suggestion",
+      },
+      {
+        "<leader>aa",
+        function() require("sidekick.cli").toggle() end,
+        desc = "Sidekick Toggle CLI",
+      },
+      {
+        "<leader>as",
+        function() require("sidekick.cli").select() end,
+        -- Or to select only installed tools:
+        -- require("sidekick.cli").select({ filter = { installed = true } })
+        desc = "Select CLI",
+      },
+      {
+        "<leader>at",
+        function() require("sidekick.cli").send({ msg = "{this}" }) end,
+        mode = { "x", "n" },
+        desc = "Send This",
+      },
+      {
+        "<leader>av",
+        function() require("sidekick.cli").send({ msg = "{selection}" }) end,
+        mode = { "x" },
+        desc = "Send Visual Selection",
+      },
+      {
+        "<leader>ap",
+        function() require("sidekick.cli").prompt() end,
+        mode = { "n", "x" },
+        desc = "Sidekick Select Prompt",
+      },
+      {
+        "<c-.>",
+        function() require("sidekick.cli").focus() end,
+        mode = { "n", "x", "i", "t" },
+        desc = "Sidekick Switch Focus",
+      },
+      -- Example of a keybinding to open Claude directly
+      {
+        "<leader>ac",
+        function() require("sidekick.cli").toggle({ name = "claude", focus = true }) end,
+        desc = "Sidekick Toggle Claude",
+      },
+    },
   }
 })
 
@@ -712,150 +667,3 @@ highlight Normal ctermbg=none guibg=none
 highlight NonText ctermbg=none guibg=none
 highlight SignColumn ctermbg=none guibg=none
 ]]
-
--- Customization for Pmenu
-vim.api.nvim_set_hl(0, "PmenuSel", {
-  bg = "#282C34",
-  fg = "NONE"
-})
-vim.api.nvim_set_hl(0, "Pmenu", {
-  fg = "#C5CDD9",
-  bg = "#22252A"
-})
-
-vim.api.nvim_set_hl(0, "CmpItemAbbrDeprecated", {
-  fg = "#7E8294",
-  bg = "NONE",
-  strikethrough = true
-})
-vim.api.nvim_set_hl(0, "CmpItemAbbrMatch", {
-  fg = "#82AAFF",
-  bg = "NONE",
-  bold = true
-})
-vim.api.nvim_set_hl(0, "CmpItemAbbrMatchFuzzy", {
-  fg = "#82AAFF",
-  bg = "NONE",
-  bold = true
-})
-vim.api.nvim_set_hl(0, "CmpItemMenu", {
-  fg = "#C792EA",
-  bg = "NONE",
-  italic = true
-})
-
-vim.api.nvim_set_hl(0, "CmpItemKindField", {
-  fg = "#EED8DA",
-  bg = "#B5585F"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindProperty", {
-  fg = "#EED8DA",
-  bg = "#B5585F"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindEvent", {
-  fg = "#EED8DA",
-  bg = "#B5585F"
-})
-
-vim.api.nvim_set_hl(0, "CmpItemKindText", {
-  fg = "#C3E88D",
-  bg = "#9FBD73"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindEnum", {
-  fg = "#C3E88D",
-  bg = "#9FBD73"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindKeyword", {
-  fg = "#C3E88D",
-  bg = "#9FBD73"
-})
-
-vim.api.nvim_set_hl(0, "CmpItemKindConstant", {
-  fg = "#FFE082",
-  bg = "#D4BB6C"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindConstructor", {
-  fg = "#FFE082",
-  bg = "#D4BB6C"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindReference", {
-  fg = "#FFE082",
-  bg = "#D4BB6C"
-})
-
-vim.api.nvim_set_hl(0, "CmpItemKindFunction", {
-  fg = "#EADFF0",
-  bg = "#A377BF"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindStruct", {
-  fg = "#EADFF0",
-  bg = "#A377BF"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindClass", {
-  fg = "#EADFF0",
-  bg = "#A377BF"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindModule", {
-  fg = "#EADFF0",
-  bg = "#A377BF"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindOperator", {
-  fg = "#EADFF0",
-  bg = "#A377BF"
-})
-
-vim.api.nvim_set_hl(0, "CmpItemKindVariable", {
-  fg = "#C5CDD9",
-  bg = "#7E8294"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindFile", {
-  fg = "#C5CDD9",
-  bg = "#7E8294"
-})
-
-vim.api.nvim_set_hl(0, "CmpItemKindUnit", {
-  fg = "#F5EBD9",
-  bg = "#D4A959"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindSnippet", {
-  fg = "#F5EBD9",
-  bg = "#D4A959"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindFolder", {
-  fg = "#F5EBD9",
-  bg = "#D4A959"
-})
-
-vim.api.nvim_set_hl(0, "CmpItemKindMethod", {
-  fg = "#DDE5F5",
-  bg = "#6C8ED4"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindValue", {
-  fg = "#DDE5F5",
-  bg = "#6C8ED4"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindEnumMember", {
-  fg = "#DDE5F5",
-  bg = "#6C8ED4"
-})
-
-vim.api.nvim_set_hl(0, "CmpItemKindInterface", {
-  fg = "#D8EEEB",
-  bg = "#58B5A8"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindColor", {
-  fg = "#D8EEEB",
-  bg = "#58B5A8"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindTypeParameter", {
-  fg = "#D8EEEB",
-  bg = "#58B5A8"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindColor", {
-  fg = "#D8EEEB",
-  bg = "#58B5A8"
-})
-vim.api.nvim_set_hl(0, "CmpItemKindTypeParameter", {
-  fg = "#D8EEEB",
-  bg = "#58B5A8"
-})
