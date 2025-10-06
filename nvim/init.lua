@@ -1,16 +1,26 @@
-vim.env.PATH = vim.fn.system('fnm use 22 && echo $PATH')
+-- Global settings
 vim.g.mapleader = " "
--- vim.o.hidden = true -- deprecated, always enabled in 0.10+
+
+-- Backup and file handling
 vim.o.backup = false
 vim.o.writebackup = false
+vim.o.swapfile = false
+vim.opt.fixeol = false
 
+-- UI and appearance
 vim.o.termguicolors = true
-
 vim.o.background = "dark"
+vim.o.signcolumn = "yes"
+vim.o.laststatus = 3
+vim.o.showcmd = true
+vim.o.title = true
+vim.o.titlestring = "%(%{expand('%:~:.:h')}%)\\%t"
+vim.opt.fillchars:append({
+  eob = " ",
+  diff = "╱"
+})
 
-vim.o.signcolumn = "yes" -- always show sign column, so to won't shift the text all the time when lsp error shows up
--- vim.o.number = true
-
+-- Editing and indentation
 vim.o.tabstop = 2
 vim.o.shiftwidth = 2
 vim.o.softtabstop = 2
@@ -18,80 +28,40 @@ vim.o.expandtab = true
 vim.o.smarttab = true
 vim.o.autoindent = true
 vim.o.smartindent = true
+vim.o.backspace = "eol,start,indent"
+vim.o.wrap = true
 
+-- Search and completion
 vim.o.ignorecase = true
 vim.o.smartcase = true
 vim.o.infercase = true
-
--- custom completion behaviors for command line
+vim.o.incsearch = false
 vim.o.wildignorecase = true
 vim.o.wildmode = "longest:full,full"
 vim.o.wildmenu = true
-
 vim.o.completeopt = "menu,menuone,noselect"
 vim.o.cmdheight = 1
+vim.o.pumheight = 10
+vim.o.inccommand = "split"
 
--- system
+-- Mouse
 vim.o.mouse = "a"
-vim.o.swapfile = false
 vim.o.errorbells = false
 
--- auto reload (first line is no enough)
+-- Performance and behavior
 vim.o.autoread = true
-vim.cmd("au CursorHold * checktime")
-
--- fix backspace
-vim.o.backspace = "eol,start,indent"
--- vim.o.magic = true -- deprecated, always enabled
-
--- faster response time
 vim.o.updatetime = 300
--- Don't pass messages to |ins-completion-menu|.
 vim.opt.shortmess:append("c")
-
--- set large redrawtime to make sure syntax highlight working all the time
 vim.o.redrawtime = 10000
-
 vim.o.foldnestmax = 1
 
--- vim.o.lazyredraw = true
-
--- remove trailing space
--- autocmd BufWritePre * %s/\s\+$//e
-
--- show pressed key
-vim.o.showcmd = true
-
-local osname = vim.uv.os_uname().sysname
-if string.find(osname, "Windows") then
-  vim.o.shell = "cmd"
-elseif vim.fn.executable("fish") then
-  vim.o.shell = "fish"
-end
-
+-- Window and splits
 vim.o.splitbelow = true
 vim.o.splitright = true
 
--- vim.o.lsp = 2 -- not a valid option
+-- auto reload (first line is no enough)
+vim.cmd("au CursorHold * checktime")
 
-vim.o.title = true
-vim.o.titlestring = "%(%{expand('%:~:.:h')}%)\\%t"
-
--- fix newline at the end of file (causing git changes)
-vim.opt.fixeol = false
-
--- hide the tilde characters on the blank lines
--- better diff looking
---[[ vim.opt.fillchars:append({ eob = " ", vert = "▏", diff = "╱" }) ]]
-vim.opt.fillchars:append({
-  eob = " ",
-  diff = "╱"
-})
-
--- enable replace preview
-vim.o.inccommand = "split"
-
-vim.o.wrap = true
 -- disable terminal numbers
 vim.cmd("autocmd TermOpen * setlocal nonumber norelativenumber")
 
@@ -109,9 +79,6 @@ vim.diagnostic.config({
     }
   }
 })
-
--- autocomplete
-vim.o.pumheight = 10
 
 -- yank highlight and preserve cursor position
 local augroups = {}
@@ -160,14 +127,10 @@ for group, commands in pairs(augroups) do
   end
 end
 
--- search
-vim.o.incsearch = false
-
--- 0.8 features
--- vim.o.winbar = "%f"
-vim.o.laststatus = 3
-
-vim.g.neovide_scroll_animation_length = 0.3
+-- make sure using the latest node version instead of the workspace version
+if vim.fn.executable("fnm") == 1 then
+  vim.env.PATH = vim.fn.system('fnm use 22 && echo $PATH')
+end
 
 -- lazy
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -177,9 +140,6 @@ if not vim.uv.fs_stat(lazypath) then
       lazypath })
 end
 vim.opt.rtp:prepend(lazypath)
-
--- native comment
-
 
 require("lazy").setup({ "tpope/vim-repeat", "machakann/vim-sandwich", {
   "notjedi/nvim-rooter.lua",
@@ -196,29 +156,30 @@ require("lazy").setup({ "tpope/vim-repeat", "machakann/vim-sandwich", {
       -- vim.cmd [[colorscheme tokyonight-storm]]
       -- vim.cmd [[highlight WinSeparator guifg=grey]]
     end
-  }, {
-  "tamton-aquib/staline.nvim",
-  config = function()
-    require("staline").setup({
-      sections = {
-        left = { "cwd", "branch" },
-        mid = {},
-        right = { "line_column" }
-      },
-      mode_colors = {
-        i = "#d4be98",
-        n = "#84a598",
-        c = "#8fbf7f",
-        v = "#fc802d"
-      },
-      defaults = {
-        true_colors = true,
-        line_column = "%l:%c %y"
-        -- branch_symbol = " "
-      }
-    })
-  end
-}, -- telescope
+  },
+  {
+    "tamton-aquib/staline.nvim",
+    config = function()
+      require("staline").setup({
+        sections = {
+          left = { "cwd", "branch" },
+          mid = {},
+          right = { "line_column" }
+        },
+        mode_colors = {
+          i = "#d4be98",
+          n = "#84a598",
+          c = "#8fbf7f",
+          v = "#fc802d"
+        },
+        defaults = {
+          true_colors = true,
+          line_column = "%l:%c %y"
+          -- branch_symbol = " "
+        }
+      })
+    end
+  }, -- telescope
   {
     "nvim-telescope/telescope.nvim",
     dependencies = { { "nvim-lua/plenary.nvim" } },
@@ -241,24 +202,23 @@ require("lazy").setup({ "tpope/vim-repeat", "machakann/vim-sandwich", {
         }
       })
     end
-  }, -- treesitter
+  },
+  -- treesitter
   {
-    "nvim-treesitter/nvim-treesitter",
-    build = ":TSUpdate",
+    'nvim-treesitter/nvim-treesitter',
+    lazy = false,
+    branch = 'main',
+    build = ':TSUpdate'
+  },
+  {
+    "shushtain/nvim-treesitter-incremental-selection",
     config = function()
-      require("nvim-treesitter.configs").setup({
-        auto_install = true,
-        highlight = {
-          enable = true
-        },
-        incremental_selection = {
-          enable = true,
-          keymaps = {
-            node_incremental = "v",
-            node_decremental = "V"
-          }
-        }
-      })
+      local tsis = require("nvim-treesitter-incremental-selection")
+
+      tsis.setup()
+      vim.keymap.set("n", "v", tsis.init_selection)
+      vim.keymap.set("v", "v", tsis.increment_node)
+      vim.keymap.set("v", "V", tsis.decrement_node)
     end
   },
   -- lsp
@@ -414,50 +374,56 @@ require("lazy").setup({ "tpope/vim-repeat", "machakann/vim-sandwich", {
         end, { "i", "s" })
       }),
       sources = cmp.config.sources({ -- { name = "codeium" },
-        {
-          name = "nvim_lsp"
-        }, {
-        name = "luasnip"
-      } -- For luasnip users.
-      }, { {
-        name = "buffer"
-      } })
+          {
+            name = "nvim_lsp"
+          },
+          {
+            name = "luasnip"
+          } -- For luasnip users.
+        },
+        { {
+          name = "buffer"
+        } })
     })
 
     -- Set configuration for specific filetype.
     cmp.setup.filetype("gitcommit", {
       sources = cmp.config.sources({ {
-        name = "cmp_git"
-      } -- You can specify the `cmp_git` source if you were installed it.
-      }, { {
-        name = "buffer"
-      } })
+          name = "cmp_git"
+        } -- You can specify the `cmp_git` source if you were installed it.
+        },
+        { {
+          name = "buffer"
+        } })
     })
 
     -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
-    cmp.setup.cmdline({ "/", "?" }, {
-      mapping = cmp.mapping.preset.cmdline(),
-      sources = { {
-        name = "buffer"
-      } }
-    })
+    cmp.setup.cmdline({ "/", "?" },
+      {
+        mapping = cmp.mapping.preset.cmdline(),
+        sources = { {
+          name = "buffer"
+        } }
+      })
 
     -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
     cmp.setup.cmdline(":", {
       mapping = cmp.mapping.preset.cmdline(),
       sources = cmp.config.sources({ {
-        name = "path"
-      } }, { {
-        name = "cmdline"
-      } })
+          name = "path"
+        } },
+        { {
+          name = "cmdline"
+        } })
     })
   end
-}, {
-  "L3MON4D3/LuaSnip",
-  config = function()
-    require("luasnip.loaders.from_vscode").lazy_load()
-  end
-}, "saadparwaiz1/cmp_luasnip", "johngrib/vim-game-code-break", {
+},
+  {
+    "L3MON4D3/LuaSnip",
+    config = function()
+      require("luasnip.loaders.from_vscode").lazy_load()
+    end
+  }, "saadparwaiz1/cmp_luasnip", "johngrib/vim-game-code-break", {
   "yamatsum/nvim-cursorline",
   config = function()
     require("nvim-cursorline").setup({
@@ -466,255 +432,269 @@ require("lazy").setup({ "tpope/vim-repeat", "machakann/vim-sandwich", {
       }
     })
   end
-}, {
-  "windwp/nvim-autopairs",
-  config = function()
-    require("nvim-autopairs").setup({})
-  end
-}, {
-  "windwp/nvim-ts-autotag",
-  config = function()
-    require("nvim-ts-autotag").setup({
-      opts = {
-        enable_rename = false,
-        enable_close_on_slash = false
-      }
-    })
-  end
-}, {
-  "nvim-tree/nvim-tree.lua",
-  dependencies = { "nvim-tree/nvim-web-devicons" -- optional
+},
+  {
+    "windwp/nvim-autopairs",
+    config = function()
+      require("nvim-autopairs").setup({})
+    end
   },
-  opts = {
-    view = {
-      float = {
-        enable = true,
-        open_win_config = function()
-          local screen_w = vim.opt.columns:get()
-          local screen_h = vim.opt.lines:get() - vim.opt.cmdheight:get()
-          local window_w = math.floor(screen_w * 0.8)
-          local window_h = math.floor(screen_h * 0.8)
-          return {
-            title = " NvimTree ",
-            title_pos = "center",
-            border = "rounded",
-            relative = "editor",
-            row = (screen_h - window_h) * 0.5,
-            col = (screen_w - window_w) * 0.5,
-            width = window_w,
-            height = window_h
-          }
-        end
-      }
+  {
+    "windwp/nvim-ts-autotag",
+    config = function()
+      require("nvim-ts-autotag").setup({
+        opts = {
+          enable_rename = false,
+          enable_close_on_slash = false
+        }
+      })
+    end
+  },
+  {
+    "nvim-tree/nvim-tree.lua",
+    dependencies = { "nvim-tree/nvim-web-devicons" -- optional
     },
-    on_attach = function(bufnr)
-      local api = require("nvim-tree.api")
-      api.config.mappings.default_on_attach(bufnr)
-      -- set no horizontal scroll
-      vim.cmd([[set mousescroll=hor:0]])
-      -- vim.api.nvim_exec("set mousescroll=hor:0", true)
-    end,
-    hijack_cursor = true, -- keep cursor on the first letter
-    renderer = {
-      indent_width = 2,
-      icons = {
-        git_placement = "signcolumn",
-        show = {
-          folder_arrow = false
-        },
-        glyphs = {
-          folder = {
-            default = "",
-            open = "",
-            symlink = ""
-          }
+    opts = {
+      view = {
+        float = {
+          enable = true,
+          open_win_config = function()
+            local screen_w = vim.opt.columns:get()
+            local screen_h = vim.opt.lines:get() - vim.opt.cmdheight:get()
+            local window_w = math.floor(screen_w * 0.8)
+            local window_h = math.floor(screen_h * 0.8)
+            return {
+              title = " NvimTree ",
+              title_pos = "center",
+              border = "rounded",
+              relative = "editor",
+              row = (screen_h - window_h) * 0.5,
+              col = (screen_w - window_w) * 0.5,
+              width = window_w,
+              height = window_h
+            }
+          end
         }
       },
-      indent_markers = {
-        enable = true
-      }
-    },
-    diagnostics = {
-      enable = true,
-      show_on_dirs = true
-    },
-    filters = {
-      custom = { "^.git$", "^.github$" }
-    },
-    actions = {
-      change_dir = {
-        enable = false,
-        restrict_above_cwd = true
+      on_attach = function(bufnr)
+        local api = require("nvim-tree.api")
+        api.config.mappings.default_on_attach(bufnr)
+        -- set no horizontal scroll
+        vim.cmd([[set mousescroll=hor:0]])
+        -- vim.api.nvim_exec("set mousescroll=hor:0", true)
+      end,
+      hijack_cursor = true, -- keep cursor on the first letter
+      renderer = {
+        indent_width = 2,
+        icons = {
+          git_placement = "signcolumn",
+          show = {
+            folder_arrow = false
+          },
+          glyphs = {
+            folder = {
+              default = "",
+              open = "",
+              symlink = ""
+            }
+          }
+        },
+        indent_markers = {
+          enable = true
+        }
+      },
+      diagnostics = {
+        enable = true,
+        show_on_dirs = true
+      },
+      filters = {
+        custom = { "^.git$", "^.github$" }
+      },
+      actions = {
+        change_dir = {
+          enable = false,
+          restrict_above_cwd = true
+        }
       }
     }
-  }
-}, { "maxmellon/vim-jsx-pretty" }, {
-  "NMAC427/guess-indent.nvim",
-  config = function()
-    require("guess-indent").setup({})
-  end
-}, {
-  "shellRaining/hlchunk.nvim",
-  event = { "UIEnter" },
-  config = function()
-    require("hlchunk").setup({
-      blank = {
-        enable = false
-      },
-      indent = {
-        enable = false
-      }
-    })
-  end
-}, {
-  "zbirenbaum/copilot.lua",
-  config = function()
-    require("copilot").setup({
-      suggestion = {
-        auto_trigger = true
-      }
-    })
-  end
-}, {
-  "rmagatti/auto-session",
-  dependencies = "nvim-tree/nvim-tree.lua",
-  config = function()
-    local api = require("nvim-tree.api")
-    local function close_nvim_tree()
-      api.tree.close()
+  },
+  { "maxmellon/vim-jsx-pretty" },
+  {
+    "NMAC427/guess-indent.nvim",
+    config = function()
+      require("guess-indent").setup({})
     end
-    -- local function open_nvim_tree()
-    --   api.tree.open()
-    -- end
-    require("auto-session").setup({
-      log_level = "error",
-      auto_session_suppress_dirs = { "~/", "~/Projects", "~/Downloads", "/" },
-      bypass_session_save_file_types = { "NvimTree" },
-      -- fix nvim-tree
-      pre_save_cmds = { close_nvim_tree }
-    })
-  end
-}, {
-  "rebelot/kanagawa.nvim",
-  config = function()
-    -- vim.cmd [[colorscheme kanagawa]]
-  end
-}, {
-  "pocco81/auto-save.nvim",
-  config = function()
-    require("auto-save").setup({
-      -- debounce_delay = 3000,
-    })
-  end
-}, {
-  "lambdalisue/suda.vim",
-  config = function()
-    vim.g.suda_smart_edit = true
-  end
-}, -- Lua
+  },
+  {
+    "shellRaining/hlchunk.nvim",
+    event = { "UIEnter" },
+    config = function()
+      require("hlchunk").setup({
+        blank = {
+          enable = false
+        },
+        indent = {
+          enable = false
+        }
+      })
+    end
+  },
+  {
+    "zbirenbaum/copilot.lua",
+    config = function()
+      require("copilot").setup({
+        suggestion = {
+          auto_trigger = true
+        }
+      })
+    end
+  },
+  {
+    "rmagatti/auto-session",
+    dependencies = "nvim-tree/nvim-tree.lua",
+    config = function()
+      local api = require("nvim-tree.api")
+      local function close_nvim_tree()
+        api.tree.close()
+      end
+      -- local function open_nvim_tree()
+      --   api.tree.open()
+      -- end
+      require("auto-session").setup({
+        log_level = "error",
+        auto_session_suppress_dirs = { "~/", "~/Projects", "~/Downloads", "/" },
+        bypass_session_save_file_types = { "NvimTree" },
+        -- fix nvim-tree
+        pre_save_cmds = { close_nvim_tree }
+      })
+    end
+  },
+  {
+    "rebelot/kanagawa.nvim",
+    config = function()
+      -- vim.cmd [[colorscheme kanagawa]]
+    end
+  },
+  {
+    "pocco81/auto-save.nvim",
+    config = function()
+      require("auto-save").setup({
+        -- debounce_delay = 3000,
+      })
+    end
+  },
+  {
+    "lambdalisue/suda.vim",
+    config = function()
+      vim.g.suda_smart_edit = true
+    end
+  }, -- Lua
   {
     "0oAstro/dim.lua",
     dependencies = { "nvim-treesitter/nvim-treesitter", "neovim/nvim-lspconfig" },
     config = function()
       require("dim").setup()
     end
-  }, { -- peek definition
-  "dnlhc/glance.nvim",
-  event = "VeryLazy",
-  config = function()
-    require("glance").setup({
-      -- your configuration
-    })
-  end
-}, { -- keep cursor in place after > or =
-  "gbprod/stay-in-place.nvim",
-  config = function()
-    require("stay-in-place").setup()
-  end
-}, {
-  "AlexvZyl/nordic.nvim",
-  lazy = false,
-  priority = 1000,
-  config = function()
-    -- require("nordic").load()
-  end
-}, {
-  "folke/noice.nvim",
-  event = "VeryLazy",
-  opts = {
-    messages = {
-      view_error = "mini",
-      view_warn = "mini",
-      view = "mini"
+  },
+  { -- peek definition
+    "dnlhc/glance.nvim",
+    event = "VeryLazy",
+    config = function()
+      require("glance").setup({
+        -- your configuration
+      })
+    end
+  },
+  { -- keep cursor in place after > or =
+    "gbprod/stay-in-place.nvim",
+    config = function()
+      require("stay-in-place").setup()
+    end
+  },
+  {
+    "AlexvZyl/nordic.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      -- require("nordic").load()
+    end
+  },
+  {
+    "folke/noice.nvim",
+    event = "VeryLazy",
+    opts = {
+      messages = {
+        view_error = "mini",
+        view_warn = "mini",
+        view = "mini"
+      },
+      notify = {
+        view = "mini"
+      }
     },
-    notify = {
-      view = "mini"
+    dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify" }
+  },
+  {
+    "EdenEast/nightfox.nvim",
+    lazy = false,
+    config = function()
+      -- vim.cmd [[colorscheme duskfox]]
+    end
+  },
+  {
+    'stevearc/conform.nvim',
+    opts = {
+      config = function()
+        require('conform').setup({
+          formatters_by_ft = {
+            lua = { "stylua" },
+            javascriptreact = { "prettierd", "prettier" },
+            javascript = { "prettierd", "prettier" }
+          }
+        })
+        vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
+      end
     }
   },
-  dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify" }
-}, {
-  "EdenEast/nightfox.nvim",
-  lazy = false,
-  config = function()
-    -- vim.cmd [[colorscheme duskfox]]
-  end
-}, {
-  'stevearc/conform.nvim',
-  opts = {
+  {
+    "utilyre/barbecue.nvim",
+    name = "barbecue",
+    version = "*",
+    dependencies = { "SmiteshP/nvim-navic", "nvim-tree/nvim-web-devicons" -- optional dependency
+    },
+    opts = {
+      -- configurations go here
+    }
+  },
+  {
+    "antosha417/nvim-lsp-file-operations",
+    dependencies = { "nvim-lua/plenary.nvim", "nvim-tree/nvim-tree.lua" },
     config = function()
-      require('conform').setup({
-        formatters_by_ft = {
-          lua = { "stylua" },
-          javascriptreact = { "prettierd", "prettier" },
-          javascript = { "prettierd", "prettier" }
-        }
-      })
-      vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
+      require("lsp-file-operations").setup()
+    end
+  },
+  {
+    "fcancelinha/nordern.nvim",
+    branch = "master",
+    priority = 1000
+  },
+  {
+    "pmizio/typescript-tools.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+    opts = {},
+  },
+  {
+    "JoosepAlviste/nvim-ts-context-commentstring",
+    config = function()
+      require("ts_context_commentstring").setup()
+      -- native comment
+      local get_option = vim.filetype.get_option
+      vim.filetype.get_option = function(filetype, option)
+        return option == "commentstring" and require("ts_context_commentstring.internal").calculate_commentstring() or
+            get_option(filetype, option)
+      end
     end
   }
-}, {
-  "utilyre/barbecue.nvim",
-  name = "barbecue",
-  version = "*",
-  dependencies = { "SmiteshP/nvim-navic", "nvim-tree/nvim-web-devicons" -- optional dependency
-  },
-  opts = {
-    -- configurations go here
-  }
-}, {
-  "antosha417/nvim-lsp-file-operations",
-  dependencies = { "nvim-lua/plenary.nvim", "nvim-tree/nvim-tree.lua" },
-  config = function()
-    require("lsp-file-operations").setup()
-  end
-}, {
-  "fcancelinha/nordern.nvim",
-  branch = "master",
-  priority = 1000
-}, {
-  "CopilotC-Nvim/CopilotChat.nvim",
-  dependencies = {
-    "nvim-lua/plenary.nvim",
-    branch = "master"
-  },
-  build = "make tiktoken",
-  opts = {},
-}, {
-  "pmizio/typescript-tools.nvim",
-  dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
-  opts = {},
-}, {
-  "JoosepAlviste/nvim-ts-context-commentstring",
-  config = function()
-    require("ts_context_commentstring").setup()
-    -- native comment
-    local get_option = vim.filetype.get_option
-    vim.filetype.get_option = function(filetype, option)
-      return option == "commentstring" and require("ts_context_commentstring.internal").calculate_commentstring() or
-          get_option(filetype, option)
-    end
-  end
-}
 })
 
 -- commands
