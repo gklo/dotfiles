@@ -141,6 +141,10 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
+  -- color schemes 
+  "EdenEast/nightfox.nvim",
+  { "catppuccin/nvim", name = "catppuccin", priority = 1000 },
+  -- plugins
   "tpope/vim-repeat",
   "machakann/vim-sandwich",
   {
@@ -149,56 +153,6 @@ require("lazy").setup({
       require("nvim-rooter").setup({
         rooter_patterns = { ".git", ".hg", ".svn", "init.lua" },
         trigger_patterns = { "*" }
-      })
-    end
-  },
-  {
-    "folke/tokyonight.nvim",
-    opts = {}
-  },
-  {
-    "tamton-aquib/staline.nvim",
-    config = function()
-      require("staline").setup({
-        sections = {
-          left = { "cwd", "branch" },
-          mid = {},
-          right = { "line_column" }
-        },
-        mode_colors = {
-          i = "#d4be98",
-          n = "#84a598",
-          c = "#8fbf7f",
-          v = "#fc802d"
-        },
-        defaults = {
-          true_colors = true,
-          line_column = "%l:%c %y"
-          -- branch_symbol = " "
-        }
-      })
-    end
-  }, -- telescope
-  {
-    "nvim-telescope/telescope.nvim",
-    dependencies = { { "nvim-lua/plenary.nvim" } },
-    config = function()
-      require("telescope").setup({
-        pickers = {
-          colorscheme = {
-            enable_preview = true
-          }
-        },
-        defaults = {
-          file_ignore_patterns = { ".git", "node_modules", "vendor" },
-          layout_strategy = "vertical",
-          layout_config = {
-            vertical = {
-              preview_height = 0.6,
-              preview_cutoff = 1
-            }
-          }
-        }
       })
     end
   },
@@ -318,135 +272,34 @@ require("lazy").setup({
           end,
           "fallback",
         },
+        ["<CR>"] = {
+          "accept",
+          "fallback"
+        }
       },
-
       appearance = {
         nerd_font_variant = 'mono'
       },
-
       completion = {
         documentation = { auto_show = true },
       },
-
       sources = {
         default = { 'lsp', 'path', 'snippets', 'buffer' },
       },
-
       fuzzy = { implementation = "prefer_rust_with_warning" },
-
     },
     opts_extend = { "sources.default" }
   },
   {
-    "yamatsum/nvim-cursorline",
-    config = function()
-      require("nvim-cursorline").setup({
-        cursorline = {
-          timeout = 300
-        }
-      })
-    end
-  },
-  {
-    "windwp/nvim-autopairs",
-    config = function()
-      require("nvim-autopairs").setup({})
-    end
-  },
-  {
-    "windwp/nvim-ts-autotag",
-    opts = {
-      opts = {
-        enable_rename = false,
-        enable_close_on_slash = false
-      }
-    }
-  },
-  {
-    "nvim-tree/nvim-tree.lua",
-    dependencies = { "nvim-tree/nvim-web-devicons" },
-    opts = {
-      view = {
-        float = {
-          enable = true,
-          open_win_config = function()
-            local screen_w = vim.opt.columns:get()
-            local screen_h = vim.opt.lines:get() - vim.opt.cmdheight:get()
-            local window_w = math.floor(screen_w * 0.8)
-            local window_h = math.floor(screen_h * 0.8)
-            return {
-              title = " NvimTree ",
-              title_pos = "center",
-              border = "rounded",
-              relative = "editor",
-              row = (screen_h - window_h) * 0.5,
-              col = (screen_w - window_w) * 0.5,
-              width = window_w,
-              height = window_h
-            }
-          end
-        }
-      },
-      on_attach = function(bufnr)
-        local api = require("nvim-tree.api")
-        api.config.mappings.default_on_attach(bufnr)
-        -- set no horizontal scroll
-        vim.cmd([[set mousescroll=hor:0]])
-        -- vim.api.nvim_exec("set mousescroll=hor:0", true)
-      end,
-      hijack_cursor = true, -- keep cursor on the first letter
-      renderer = {
-        indent_width = 2,
-        icons = {
-          git_placement = "signcolumn",
-          show = {
-            folder_arrow = false
-          },
-          glyphs = {
-            folder = {
-              default = "",
-              open = "",
-              symlink = ""
-            }
-          }
-        },
-        indent_markers = {
-          enable = true
-        }
-      },
-      diagnostics = {
-        enable = true,
-        show_on_dirs = true
-      },
-      filters = {
-        custom = { "^.git$", "^.github$" }
-      },
-      actions = {
-        change_dir = {
-          enable = false,
-          restrict_above_cwd = true
-        }
-      }
-    }
+    'saghen/blink.pairs',
+    version = '*',
+    dependencies = 'saghen/blink.download',
+    opts = {}
   },
   "maxmellon/vim-jsx-pretty",
   {
     "NMAC427/guess-indent.nvim",
     opts = {}
-  },
-  {
-    "shellRaining/hlchunk.nvim",
-    event = { "UIEnter" },
-    config = function()
-      require("hlchunk").setup({
-        blank = {
-          enable = false
-        },
-        indent = {
-          enable = false
-        }
-      })
-    end
   },
   {
     "zbirenbaum/copilot.lua",
@@ -477,44 +330,14 @@ require("lazy").setup({
     end
   },
   {
-    "rebelot/kanagawa.nvim",
-    opts = {}
-  },
-  {
-    "pocco81/auto-save.nvim",
-    opts = {
-      -- debounce_delay = 3000,
-    }
-  },
-  {
     "lambdalisue/suda.vim",
     config = function()
       vim.g.suda_smart_edit = true
     end
   }, -- Lua
-  {
-    "0oAstro/dim.lua",
-    dependencies = { "nvim-treesitter/nvim-treesitter", "neovim/nvim-lspconfig" },
-    opts = {}
-  },
-  { -- peek definition
-    "dnlhc/glance.nvim",
-    event = "VeryLazy",
-    opts = {
-      -- your configuration
-    }
-  },
-  { -- keep cursor in place after > or =
+  {  -- keep cursor in place after > or =
     "gbprod/stay-in-place.nvim",
     opts = {}
-  },
-  {
-    "AlexvZyl/nordic.nvim",
-    lazy = false,
-    priority = 1000,
-    config = function()
-      -- require("nordic").load()
-    end
   },
   {
     "folke/noice.nvim",
@@ -530,48 +353,6 @@ require("lazy").setup({
       }
     },
     dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify" }
-  },
-  {
-    "EdenEast/nightfox.nvim",
-    lazy = false,
-    config = function()
-      -- vim.cmd [[colorscheme duskfox]]
-    end
-  },
-  {
-    'stevearc/conform.nvim',
-    opts = {
-      config = function()
-        require('conform').setup({
-          formatters_by_ft = {
-            lua = { "stylua" },
-            javascriptreact = { "prettierd", "prettier" },
-            javascript = { "prettierd", "prettier" }
-          }
-        })
-        vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
-      end
-    }
-  },
-  {
-    "utilyre/barbecue.nvim",
-    name = "barbecue",
-    version = "*",
-    dependencies = { "SmiteshP/nvim-navic", "nvim-tree/nvim-web-devicons" -- optional dependency
-    },
-    opts = {
-      -- configurations go here
-    }
-  },
-  {
-    "antosha417/nvim-lsp-file-operations",
-    dependencies = { "nvim-lua/plenary.nvim", "nvim-tree/nvim-tree.lua" },
-    opts = {}
-  },
-  {
-    "fcancelinha/nordern.nvim",
-    branch = "master",
-    priority = 1000
   },
   {
     "pmizio/typescript-tools.nvim",
@@ -649,6 +430,47 @@ require("lazy").setup({
         desc = "Sidekick Toggle Claude",
       },
     },
+  },
+  {
+    "folke/snacks.nvim",
+    priority = 1000,
+    lazy = false,
+    ---@type snacks.Config
+    opts = {
+      bigfile = { enabled = true },
+      explorer = { enabled = true },
+      indent = { enabled = true },
+      picker = { enabled = true },
+      quickfile = { enabled = true },
+      scope = { enabled = true },
+      statuscolumn = { enabled = true },
+      words = { enabled = true },
+      lazygit = { enabled = true }
+    },
+    keys = {
+      -- files
+      { "<leader>ff",       function() Snacks.picker.files() end,                 desc = "Find Files" },
+      { "<leader><leader>", function() Snacks.picker.buffers() end,               desc = "Buffers" },
+      { "<leader>fg",       function() Snacks.picker.grep() end,                  desc = "Grep" },
+      { "<leader>fq",       function() Snacks.picker.qflist() end,                desc = "Quick Fix" },
+      { "<C-e>",            function() Snacks.explorer() end,                     desc = "Explorer" },
+      -- LSP
+      { "gd",               function() Snacks.picker.lsp_definitions() end,       desc = "Goto Definition" },
+      { "gD",               function() Snacks.picker.lsp_declarations() end,      desc = "Goto Declaration" },
+      { "gr",               function() Snacks.picker.lsp_references() end,        nowait = true,                  desc = "References" },
+      { "gI",               function() Snacks.picker.lsp_implementations() end,   desc = "Goto Implementation" },
+      { "gy",               function() Snacks.picker.lsp_type_definitions() end,  desc = "Goto T[y]pe Definition" },
+      { "<leader>fs",       function() Snacks.picker.lsp_symbols() end,           desc = "LSP Symbols" },
+      { "<leader>fS",       function() Snacks.picker.lsp_workspace_symbols() end, desc = "LSP Workspace Symbols" },
+      -- misc
+      { "<leader>gs",       function() Snacks.picker.git_status() end,            desc = "Git Status" },
+      { "<leader>fC",       function() Snacks.picker.colorschemes() end,          desc = "Colorschemes" },
+      { "<leader>lg",       function() Snacks.lazygit() end,                      desc = "lazygit" }
+    }
+  },
+  {
+    "pocco81/auto-save.nvim",
+    opts = {}
   }
 })
 
@@ -656,14 +478,7 @@ require("lazy").setup({
 require("mappings")
 
 -- override
-vim.cmd [[colorscheme nordfox]]
+vim.cmd [[colorscheme catppuccin-mocha]]
 vim.cmd [[highlight WinSeparator guifg=darkgray1]]
 
 vim.cmd [[autocmd VimEnter * silent! !prettierd restart]]
-
--- transparent background
-vim.cmd [[
-highlight Normal ctermbg=none guibg=none
-highlight NonText ctermbg=none guibg=none
-highlight SignColumn ctermbg=none guibg=none
-]]
