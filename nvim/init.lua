@@ -141,7 +141,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-  -- color schemes 
+  -- color schemes
   "EdenEast/nightfox.nvim",
   { "catppuccin/nvim", name = "catppuccin", priority = 1000 },
   -- plugins
@@ -158,20 +158,21 @@ require("lazy").setup({
   },
   -- treesitter
   {
-    'nvim-treesitter/nvim-treesitter',
+    "nvim-treesitter/nvim-treesitter",
+    branch = 'master',
     lazy = false,
-    branch = 'main',
-    build = ':TSUpdate'
-  },
-  {
-    "shushtain/nvim-treesitter-incremental-selection",
+    build = ":TSUpdate",
     config = function()
-      local tsis = require("nvim-treesitter-incremental-selection")
-
-      tsis.setup()
-      vim.keymap.set("n", "v", tsis.init_selection)
-      vim.keymap.set("v", "v", tsis.increment_node)
-      vim.keymap.set("v", "V", tsis.decrement_node)
+      require 'nvim-treesitter.configs'.setup {
+        auto_install = true,
+        incremental_selection = {
+          enable = true,
+          keymaps = {
+            node_incremental = "v",
+            node_decremental = "V",
+          },
+        },
+      }
     end
   },
   -- lsp
@@ -309,7 +310,7 @@ require("lazy").setup({
     opts = {
       suggestion = {
         auto_trigger = true
-      }
+      },
     }
   },
   {
@@ -471,7 +472,7 @@ require("lazy").setup({
   {
     "pocco81/auto-save.nvim",
     opts = {}
-  }
+  },
 })
 
 -- commands
