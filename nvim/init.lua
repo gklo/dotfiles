@@ -291,12 +291,6 @@ require("lazy").setup({
     },
     opts_extend = { "sources.default" }
   },
-  {
-    'saghen/blink.pairs',
-    version = '*',
-    dependencies = 'saghen/blink.download',
-    opts = {}
-  },
   "maxmellon/vim-jsx-pretty",
   {
     "NMAC427/guess-indent.nvim",
@@ -440,7 +434,7 @@ require("lazy").setup({
     opts = {
       bigfile = { enabled = true },
       explorer = { enabled = true },
-      indent = { enabled = true },
+      -- indent = { enabled = true },
       picker = { enabled = true },
       quickfile = { enabled = true },
       scope = { enabled = true },
@@ -450,10 +444,10 @@ require("lazy").setup({
     },
     keys = {
       -- files
-      { "<leader>ff",       function() Snacks.picker.files() end,                 desc = "Find Files" },
+      { "<leader>f",       function() Snacks.picker.files() end,                 desc = "Find Files" },
       { "<leader><leader>", function() Snacks.picker.buffers() end,               desc = "Buffers" },
-      { "<leader>fg",       function() Snacks.picker.grep() end,                  desc = "Grep" },
-      { "<leader>fq",       function() Snacks.picker.qflist() end,                desc = "Quick Fix" },
+      { "<leader>/",       function() Snacks.picker.grep() end,                  desc = "Grep" },
+      { "<leader>q",       function() Snacks.picker.qflist() end,                desc = "Quick Fix" },
       { "<C-e>",            function() Snacks.explorer() end,                     desc = "Explorer" },
       -- LSP
       { "gd",               function() Snacks.picker.lsp_definitions() end,       desc = "Goto Definition" },
@@ -461,12 +455,12 @@ require("lazy").setup({
       { "gr",               function() Snacks.picker.lsp_references() end,        nowait = true,                  desc = "References" },
       { "gI",               function() Snacks.picker.lsp_implementations() end,   desc = "Goto Implementation" },
       { "gy",               function() Snacks.picker.lsp_type_definitions() end,  desc = "Goto T[y]pe Definition" },
-      { "<leader>fs",       function() Snacks.picker.lsp_symbols() end,           desc = "LSP Symbols" },
-      { "<leader>fS",       function() Snacks.picker.lsp_workspace_symbols() end, desc = "LSP Workspace Symbols" },
+      { "<leader>s",       function() Snacks.picker.lsp_symbols() end,           desc = "LSP Symbols" },
+      { "<leader>S",       function() Snacks.picker.lsp_workspace_symbols() end, desc = "LSP Workspace Symbols" },
       -- misc
       { "<leader>gs",       function() Snacks.picker.git_status() end,            desc = "Git Status" },
-      { "<leader>fC",       function() Snacks.picker.colorschemes() end,          desc = "Colorschemes" },
-      { "<leader>lg",       function() Snacks.lazygit() end,                      desc = "lazygit" }
+      { "<leader>C",       function() Snacks.picker.colorschemes() end,          desc = "Colorschemes" },
+      { "<leader>l",       function() Snacks.lazygit() end,                      desc = "lazygit" }
     }
   },
   {
