@@ -14,6 +14,7 @@ vim.keymap.set("n", "<C-k>", "<C-u>")
 vim.keymap.set('n', 'gw', '<c-w>w')
 vim.keymap.set("n", "<M-o>", "<cmd>bp<CR>")
 vim.keymap.set("n", "<M-i>", "<cmd>bn<CR>")
+vim.keymap.set("n", "ga", "<C-^>")
 
 -- lsp
 vim.keymap.set('n', '<leader>ef', '<cmd>lua vim.lsp.buf.format({ async = true })<CR>')

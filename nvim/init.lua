@@ -262,14 +262,57 @@ require("lazy").setup({
         preset = 'default',
         ["<Tab>"] = {
           "snippet_forward",
+          "select_next",
           function() -- sidekick next edit suggestion
             return require("sidekick").nes_jump_or_apply()
           end,
-          "accept",
           function()
             if require("copilot.suggestion").is_visible() then
               return require("copilot.suggestion").accept()
             end
+          end,
+          "fallback",
+        },
+        ["("] = {
+          function(cmp)
+            cmp.accept({
+              callback = function()
+                vim.api.nvim_feedkeys("(", "n", false)
+              end,
+            })
+          end,
+
+          "fallback",
+        },
+        ["["] = {
+          function(cmp)
+            cmp.accept({
+              callback = function()
+                vim.api.nvim_feedkeys("[", "n", false)
+              end,
+            })
+          end,
+
+          "fallback",
+        },
+
+        ["."] = {
+          function(cmp)
+            cmp.accept({
+              callback = function()
+                vim.api.nvim_feedkeys(".", "n", false)
+              end,
+            })
+          end,
+          "fallback",
+        },
+        ["<Space>"] = {
+          function(cmp)
+            cmp.accept({
+              callback = function()
+                vim.api.nvim_feedkeys(" ", "n", false)
+              end,
+            })
           end,
           "fallback",
         },
@@ -282,10 +325,27 @@ require("lazy").setup({
         nerd_font_variant = 'mono'
       },
       completion = {
+        accept        = { auto_brackets = { enabled = false }, },
         documentation = { auto_show = true },
+        ghost_text    = {
+          enabled = true,
+          show_without_selection = true,
+          show_with_menu = true,
+          show_without_menu = true,
+        },
+        list          = {
+          selection = {
+            preselect = false,
+            auto_insert = true,
+          }
+        }
+      },
+      menu = {
+        auto_show_delay_ms = 500,
       },
       sources = {
-        default = { 'lsp', 'path', 'snippets', 'buffer' },
+        -- default = { 'lsp', 'path', 'snippets', 'buffer' },
+        min_keyword_length = 2
       },
       fuzzy = { implementation = "prefer_rust_with_warning" },
     },
@@ -366,6 +426,7 @@ require("lazy").setup({
       end
     end
   },
+  -- copilot nes completion
   {
     "folke/sidekick.nvim",
     opts = {},
@@ -426,6 +487,7 @@ require("lazy").setup({
       },
     },
   },
+  -- pickers, file explorer, lazugit ...etc.
   {
     "folke/snacks.nvim",
     priority = 1000,
@@ -444,10 +506,10 @@ require("lazy").setup({
     },
     keys = {
       -- files
-      { "<leader>f",       function() Snacks.picker.files() end,                 desc = "Find Files" },
+      { "<leader>f",        function() Snacks.picker.files() end,                 desc = "Find Files" },
       { "<leader><leader>", function() Snacks.picker.buffers() end,               desc = "Buffers" },
-      { "<leader>/",       function() Snacks.picker.grep() end,                  desc = "Grep" },
-      { "<leader>q",       function() Snacks.picker.qflist() end,                desc = "Quick Fix" },
+      { "<leader>/",        function() Snacks.picker.grep() end,                  desc = "Grep" },
+      { "<leader>q",        function() Snacks.picker.qflist() end,                desc = "Quick Fix" },
       { "<C-e>",            function() Snacks.explorer() end,                     desc = "Explorer" },
       -- LSP
       { "gd",               function() Snacks.picker.lsp_definitions() end,       desc = "Goto Definition" },
@@ -455,18 +517,29 @@ require("lazy").setup({
       { "gr",               function() Snacks.picker.lsp_references() end,        nowait = true,                  desc = "References" },
       { "gI",               function() Snacks.picker.lsp_implementations() end,   desc = "Goto Implementation" },
       { "gy",               function() Snacks.picker.lsp_type_definitions() end,  desc = "Goto T[y]pe Definition" },
-      { "<leader>s",       function() Snacks.picker.lsp_symbols() end,           desc = "LSP Symbols" },
-      { "<leader>S",       function() Snacks.picker.lsp_workspace_symbols() end, desc = "LSP Workspace Symbols" },
+      { "<leader>s",        function() Snacks.picker.lsp_symbols() end,           desc = "LSP Symbols" },
+      { "<leader>S",        function() Snacks.picker.lsp_workspace_symbols() end, desc = "LSP Workspace Symbols" },
       -- misc
       { "<leader>gs",       function() Snacks.picker.git_status() end,            desc = "Git Status" },
-      { "<leader>C",       function() Snacks.picker.colorschemes() end,          desc = "Colorschemes" },
-      { "<leader>l",       function() Snacks.lazygit() end,                      desc = "lazygit" }
+      { "<leader>C",        function() Snacks.picker.colorschemes() end,          desc = "Colorschemes" },
+      { "<leader>l",        function() Snacks.lazygit() end,                      desc = "lazygit" }
     }
   },
+  -- auto save
   {
     "pocco81/auto-save.nvim",
     opts = {}
   },
+  -- proper tag selection for jsx
+  {
+    'mawkler/jsx-element.nvim',
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+      'nvim-treesitter/nvim-treesitter-textobjects',
+    },
+    ft = { 'typescriptreact', 'javascriptreact', 'javascript' },
+    opts = {},
+  }
 })
 
 -- commands
@@ -477,3 +550,19 @@ vim.cmd [[colorscheme catppuccin-mocha]]
 vim.cmd [[highlight WinSeparator guifg=darkgray1]]
 
 vim.cmd [[autocmd VimEnter * silent! !prettierd restart]]
+
+-- hide copilot suggestion on cmp
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'BlinkCmpMenuOpen',
+  callback = function()
+    require("copilot.suggestion").dismiss()
+    vim.b.copilot_suggestion_hidden = true
+  end,
+})
+
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'BlinkCmpMenuClose',
+  callback = function()
+    vim.b.copilot_suggestion_hidden = false
+  end,
+})
