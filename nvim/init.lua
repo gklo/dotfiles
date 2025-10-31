@@ -284,6 +284,17 @@ require("lazy").setup({
 
           "fallback",
         },
+        [")"] = {
+          function(cmp)
+            cmp.accept({
+              callback = function()
+                vim.api.nvim_feedkeys(")", "n", false)
+              end,
+            })
+          end,
+
+          "fallback",
+        },
         ["["] = {
           function(cmp)
             cmp.accept({
@@ -295,7 +306,17 @@ require("lazy").setup({
 
           "fallback",
         },
+        ["]"] = {
+          function(cmp)
+            cmp.accept({
+              callback = function()
+                vim.api.nvim_feedkeys("]", "n", false)
+              end,
+            })
+          end,
 
+          "fallback",
+        },
         ["."] = {
           function(cmp)
             cmp.accept({
@@ -429,7 +450,13 @@ require("lazy").setup({
   -- copilot nes completion
   {
     "folke/sidekick.nvim",
-    opts = {},
+    opts = {
+      nes = {
+        enabled = false, -- Enable NES (set to false to disable globally)
+        debounce = 500,  -- Debounce time (ms) before triggering a request (default: 150)
+        -- No direct 'modes' option, but we can control triggers via autocmds
+      }
+    },
     -- stylua: ignore
     keys = {
       {
@@ -442,11 +469,13 @@ require("lazy").setup({
         end,
         expr = true,
         desc = "Goto/Apply Next Edit Suggestion",
+        mode = { "n" }
       },
       {
         "<leader>aa",
         function() require("sidekick.cli").toggle() end,
         desc = "Sidekick Toggle CLI",
+        mode = { "n" }
       },
       {
         "<leader>as",
@@ -454,6 +483,7 @@ require("lazy").setup({
         -- Or to select only installed tools:
         -- require("sidekick.cli").select({ filter = { installed = true } })
         desc = "Select CLI",
+        mode = { "n" }
       },
       {
         "<leader>at",
