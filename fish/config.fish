@@ -5,7 +5,6 @@ if status is-interactive
     set PATH /usr/local/opt/mysql-client/bin $PATH
     set PATH /opt/homebrew/bin $PATH
     set PATH /opt/homebrew/sbin $PATH
-    set PATH /opt/homebrew/opt/node@22/bin $PATH
 
     mcfly init fish | source
     zoxide init fish | source

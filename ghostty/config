@@ -2,29 +2,38 @@
 font-family = "0xProto Regular"
 font-family-bold = "0xProto Bold"
 font-family-italic = "0xProto Italic"
-# font-family-bold-italic = "JetBrainsMono NFM Bold Italic"
-font-size = 13
+# font-family = "Cozette"
+# font-style = false
+# font-style-bold = false
+# font-style-italic = false
+font-style-bold-italic = false 
+font-size = 14
 font-thicken = true
-# font-thicken-strength = 128
+font-thicken-strength = 64
 
 # behavior
 macos-option-as-alt = true
 
 # Appearance
 adjust-cell-width = -10%
-adjust-cell-height = 10%
-macos-titlebar-style = tabs
-background-opacity = 0.9
-background-blur = true
+adjust-cell-height = 25%
+macos-titlebar-style = transparent
+# background-opacity = 0.8
+# background-blur = true
 split-divider-color = #555555
 unfocused-split-opacity = 0.3
 
 # Keybind
 keybind = cmd+r=reload_config
 keybind = cmd+enter=new_split:auto
+keybind = cmd+x=new_split:down
+keybind = cmd+y=new_split:right
 keybind = cmd+s=goto_split:next
 keybind = cmd+shift+s=goto_split:previous
 keybind = cmd+z=toggle_split_zoom
-
 # Shell
 command = /opt/homebrew/bin/fish --login --interactive
+
+background-image = ~/Documents/wallhaven-4oge7n.jpg
+background-image-fit = cover
+background-image-opacity = 0.9

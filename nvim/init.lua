@@ -38,7 +38,6 @@ vim.o.incsearch = false
 vim.o.wildignorecase = true
 vim.o.wildmode = "longest:full,full"
 vim.o.wildmenu = true
-vim.o.completeopt = "menu,menuone,noselect"
 vim.o.cmdheight = 1
 vim.o.pumheight = 10
 vim.o.inccommand = "split"
@@ -79,57 +78,28 @@ vim.diagnostic.config({
   }
 })
 
--- yank highlight and preserve cursor position
-local augroups = {}
-augroups.yankpost = {
-  save_cursor_position = {
-    event = { "VimEnter", "CursorMoved" },
-    pattern = "*",
-    callback = function()
-      cursor_pos = vim.fn.getpos(".")
-    end
-  },
-
-  highlight_yank = {
-    event = "TextYankPost",
-    pattern = "*",
-    callback = function()
-      vim.hl.on_yank({
-        higroup = "IncSearch",
-        timeout = 200,
-        on_visual = true
-      })
-    end
-  },
-
-  yank_restore_cursor = {
-    event = "TextYankPost",
-    pattern = "*",
-    callback = function()
-      local cursor_pos = vim.fn.getpos(".")
-      if vim.v.event.operator == "y" then
-        vim.fn.setpos(".", cursor_pos)
-      end
-    end
-  }
-}
-for group, commands in pairs(augroups) do
-  local augroup = vim.api.nvim_create_augroup("AU_" .. group, {
-    clear = true
-  })
-
-  for _, opts in pairs(commands) do
-    local event = opts.event
-    opts.event = nil
-    opts.group = augroup
-    vim.api.nvim_create_autocmd(event, opts)
-  end
-end
-
 -- make sure using the latest node version instead of the workspace version
 if vim.fn.executable("fnm") == 1 then
-  vim.env.PATH = vim.fn.system('fnm use 22 && echo $PATH')
+  vim.env.PATH = vim.fn.system('fnm use 24 > /dev/null && echo $PATH')
 end
+
+-- LSP
+
+vim.lsp.config('lua_ls', {
+  settings = {
+    Lua = {
+      runtime = {
+        version = "LuaJIT"
+      },
+      diagnostics = {
+        globals = { "vim", "require", "Snacks" }
+      },
+      workspace = {
+        library = vim.api.nvim_get_runtime_file("", true)
+      }
+    }
+  }
+})
 
 -- lazy
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -142,11 +112,21 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
   -- color schemes
-  "EdenEast/nightfox.nvim",
-  { "catppuccin/nvim", name = "catppuccin", priority = 1000 },
+  { "catppuccin/nvim",         name = "catppuccin", priority = 1000 },
+  {
+    'sainnhe/gruvbox-material',
+    lazy = false,
+    priority = 1000,
+    config = function()
+      -- Optionally configure and load the colorscheme
+      -- directly inside the plugin declaration.
+      vim.g.gruvbox_material_enable_italic = true
+      vim.g.gruvbox_material_transparent_background = 1
+      vim.cmd.colorscheme('gruvbox-material')
+    end
+  },
   -- plugins
   "tpope/vim-repeat",
-  "machakann/vim-sandwich",
   {
     "notjedi/nvim-rooter.lua",
     config = function()
@@ -177,200 +157,18 @@ require("lazy").setup({
   },
   -- lsp
   {
-    "williamboman/mason-lspconfig.nvim",
-    dependencies = { "williamboman/mason.nvim" },
-    config = function()
-      local on_attach = function(client, bufnr)
-        -- highlight references
-        if client.server_capabilities.documentHighlightProvider then
-          vim.api.nvim_create_augroup("lsp_document_highlight", {
-            clear = true
-          })
-          vim.api.nvim_clear_autocmds({
-            buffer = bufnr,
-            group = "lsp_document_highlight"
-          })
-          vim.api.nvim_create_autocmd("CursorHold", {
-            callback = vim.lsp.buf.document_highlight,
-            buffer = bufnr,
-            group = "lsp_document_highlight",
-            desc = "document highlight"
-          })
-          vim.api.nvim_create_autocmd("CursorMoved", {
-            callback = vim.lsp.buf.clear_references,
-            buffer = bufnr,
-            group = "lsp_document_highlight",
-            desc = "clear all the references"
-          })
-        end
-      end
-
-      local servers = { "tailwindcss", "sqlls", "pyright", "marksman", "eslint", "cssls", "html", "yamlls", "jsonls",
-        "lua_ls" }
-
-
-      local capabilities = {
-        textDocument = {
-          foldingRange = {
-            dynamicRegistration = false,
-            lineFoldingOnly = true
-          }
+    "mason-org/mason-lspconfig.nvim",
+    opts = {
+      automatic_enable = {
+        exclude = {
+          "ts_ls"
         }
       }
-
-      capabilities = require('blink.cmp').get_lsp_capabilities(capabilities)
-
-      for _, server in ipairs(servers) do
-        local opts = {
-          capabilities = capabilities,
-          on_attach = on_attach,
-          single_file_support = true
-        }
-
-        if server == "lua_ls" then
-          opts.settings = {
-            Lua = {
-              runtime = {
-                version = "LuaJIT"
-              },
-              diagnostics = {
-                globals = { "vim", "require" }
-              },
-              workspace = {
-                library = vim.api.nvim_get_runtime_file("", true)
-              }
-            }
-          }
-        end
-
-        vim.lsp.config(server, opts)
-      end
-
-      require("mason").setup()
-      require("mason-lspconfig").setup({
-        automatic_enable = true,
-        ensure_installed = { "tailwindcss", "sqlls", "pyright", "marksman", "eslint", "cssls", "html", "yamlls", "jsonls" }
-      })
-    end
-  },
-  "neovim/nvim-lspconfig",
-  {
-    'saghen/blink.cmp',
-    version = '1.*',
-    opts = {
-      keymap = {
-        preset = 'default',
-        ["<Tab>"] = {
-          "snippet_forward",
-          "select_next",
-          function() -- sidekick next edit suggestion
-            return require("sidekick").nes_jump_or_apply()
-          end,
-          function()
-            if require("copilot.suggestion").is_visible() then
-              return require("copilot.suggestion").accept()
-            end
-          end,
-          "fallback",
-        },
-        ["("] = {
-          function(cmp)
-            cmp.accept({
-              callback = function()
-                vim.api.nvim_feedkeys("(", "n", false)
-              end,
-            })
-          end,
-
-          "fallback",
-        },
-        [")"] = {
-          function(cmp)
-            cmp.accept({
-              callback = function()
-                vim.api.nvim_feedkeys(")", "n", false)
-              end,
-            })
-          end,
-
-          "fallback",
-        },
-        ["["] = {
-          function(cmp)
-            cmp.accept({
-              callback = function()
-                vim.api.nvim_feedkeys("[", "n", false)
-              end,
-            })
-          end,
-
-          "fallback",
-        },
-        ["]"] = {
-          function(cmp)
-            cmp.accept({
-              callback = function()
-                vim.api.nvim_feedkeys("]", "n", false)
-              end,
-            })
-          end,
-
-          "fallback",
-        },
-        ["."] = {
-          function(cmp)
-            cmp.accept({
-              callback = function()
-                vim.api.nvim_feedkeys(".", "n", false)
-              end,
-            })
-          end,
-          "fallback",
-        },
-        ["<Space>"] = {
-          function(cmp)
-            cmp.accept({
-              callback = function()
-                vim.api.nvim_feedkeys(" ", "n", false)
-              end,
-            })
-          end,
-          "fallback",
-        },
-        ["<CR>"] = {
-          "accept",
-          "fallback"
-        }
-      },
-      appearance = {
-        nerd_font_variant = 'mono'
-      },
-      completion = {
-        accept        = { auto_brackets = { enabled = false }, },
-        documentation = { auto_show = true },
-        ghost_text    = {
-          enabled = true,
-          show_without_selection = true,
-          show_with_menu = true,
-          show_without_menu = true,
-        },
-        list          = {
-          selection = {
-            preselect = false,
-            auto_insert = true,
-          }
-        }
-      },
-      menu = {
-        auto_show_delay_ms = 500,
-      },
-      sources = {
-        -- default = { 'lsp', 'path', 'snippets', 'buffer' },
-        min_keyword_length = 2
-      },
-      fuzzy = { implementation = "prefer_rust_with_warning" },
     },
-    opts_extend = { "sources.default" }
+    dependencies = {
+      { "mason-org/mason.nvim", opts = {} },
+      "neovim/nvim-lspconfig",
+    },
   },
   "maxmellon/vim-jsx-pretty",
   {
@@ -379,9 +177,9 @@ require("lazy").setup({
   },
   {
     "zbirenbaum/copilot.lua",
-    dependencies = {
-      "copilotlsp-nvim/copilot-lsp", -- (optional) for NES functionality
-    },
+    -- dependencies = {
+    --   "copilotlsp-nvim/copilot-lsp", -- (optional) for NES functionality
+    -- },
     opts = {
       suggestion = {
         auto_trigger = true
@@ -416,21 +214,6 @@ require("lazy").setup({
     opts = {}
   },
   {
-    "folke/noice.nvim",
-    event = "VeryLazy",
-    opts = {
-      messages = {
-        view_error = "mini",
-        view_warn = "mini",
-        view = "mini"
-      },
-      notify = {
-        view = "mini"
-      }
-    },
-    dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify" }
-  },
-  {
     "pmizio/typescript-tools.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
     opts = {},
@@ -447,76 +230,6 @@ require("lazy").setup({
       end
     end
   },
-  -- copilot nes completion
-  {
-    "folke/sidekick.nvim",
-    opts = {
-      nes = {
-        enabled = false, -- Enable NES (set to false to disable globally)
-        debounce = 500,  -- Debounce time (ms) before triggering a request (default: 150)
-        -- No direct 'modes' option, but we can control triggers via autocmds
-      }
-    },
-    -- stylua: ignore
-    keys = {
-      {
-        "<tab>",
-        function()
-          -- if there is a next edit, jump to it, otherwise apply it if any
-          if not require("sidekick").nes_jump_or_apply() then
-            return "<Tab>" -- fallback to normal tab
-          end
-        end,
-        expr = true,
-        desc = "Goto/Apply Next Edit Suggestion",
-        mode = { "n" }
-      },
-      {
-        "<leader>aa",
-        function() require("sidekick.cli").toggle() end,
-        desc = "Sidekick Toggle CLI",
-        mode = { "n" }
-      },
-      {
-        "<leader>as",
-        function() require("sidekick.cli").select() end,
-        -- Or to select only installed tools:
-        -- require("sidekick.cli").select({ filter = { installed = true } })
-        desc = "Select CLI",
-        mode = { "n" }
-      },
-      {
-        "<leader>at",
-        function() require("sidekick.cli").send({ msg = "{this}" }) end,
-        mode = { "x", "n" },
-        desc = "Send This",
-      },
-      {
-        "<leader>av",
-        function() require("sidekick.cli").send({ msg = "{selection}" }) end,
-        mode = { "x" },
-        desc = "Send Visual Selection",
-      },
-      {
-        "<leader>ap",
-        function() require("sidekick.cli").prompt() end,
-        mode = { "n", "x" },
-        desc = "Sidekick Select Prompt",
-      },
-      {
-        "<c-.>",
-        function() require("sidekick.cli").focus() end,
-        mode = { "n", "x", "i", "t" },
-        desc = "Sidekick Switch Focus",
-      },
-      -- Example of a keybinding to open Claude directly
-      {
-        "<leader>ac",
-        function() require("sidekick.cli").toggle({ name = "claude", focus = true }) end,
-        desc = "Sidekick Toggle Claude",
-      },
-    },
-  },
   -- pickers, file explorer, lazugit ...etc.
   {
     "folke/snacks.nvim",
@@ -526,13 +239,15 @@ require("lazy").setup({
     opts = {
       bigfile = { enabled = true },
       explorer = { enabled = true },
+      rename = { enabled = true },
       -- indent = { enabled = true },
       picker = { enabled = true },
       quickfile = { enabled = true },
       scope = { enabled = true },
       statuscolumn = { enabled = true },
       words = { enabled = true },
-      lazygit = { enabled = true }
+      lazygit = { enabled = true },
+      input = { enabled = true }
     },
     keys = {
       -- files
@@ -558,17 +273,184 @@ require("lazy").setup({
   -- auto save
   {
     "pocco81/auto-save.nvim",
-    opts = {}
+    opts = {
+      debounce_delay = 3000,
+    },
   },
   -- proper tag selection for jsx
+  { 'nvim-mini/mini.ai',       version = '*',       opts = {} },
+  { 'nvim-mini/mini.surround', version = '*',       opts = {} },
+  -- { 'nvim-mini/mini.pairs',    version = '*',       opts = {} },
+  { 'nvim-mini/mini.icons',    version = '*',       opts = {} },
   {
-    'mawkler/jsx-element.nvim',
+    'saghen/blink.pairs',
+    version = '*', -- (recommended) only required with prebuilt binaries
+    dependencies = 'saghen/blink.download',
+    --- @module 'blink.pairs'
+    --- @type blink.pairs.Config
+    opts = {
+      mappings = {
+        enabled = true,
+        cmdline = true,
+        disabled_filetypes = {},
+        pairs = {},
+      },
+      highlights = {
+        enabled = false,
+        cmdline = false,
+        -- highlights matching pairs under the cursor
+        matchparen = {
+          enabled = true,
+          -- known issue where typing won't update matchparen highlight, disabled by default
+          cmdline = false,
+          -- also include pairs not on top of the cursor, but surrounding the cursor
+          include_surrounding = false,
+          group = 'BlinkPairsMatchParen',
+          priority = 250,
+        },
+      },
+      debug = false,
+    }
+  },
+  {
+    'saghen/blink.cmp',
     dependencies = {
-      'nvim-treesitter/nvim-treesitter',
-      'nvim-treesitter/nvim-treesitter-textobjects',
+      'zbirenbaum/copilot.lua',
+      'onsails/lspkind.nvim'
     },
-    ft = { 'typescriptreact', 'javascriptreact', 'javascript' },
-    opts = {},
+    version = '1.*',
+    ---@module 'blink.cmp'
+    ---@type blink.cmp.Config
+    opts = {
+      keymap = {
+        preset = 'super-tab',
+        ['<Tab>'] = {
+          function(cmp)
+            local copilot = require('copilot.suggestion')
+
+            if cmp.snippet_active() then
+              return cmp.accept()
+            elseif copilot.is_visible() then
+              return copilot.accept()
+            else
+              return cmp.select_and_accept()
+            end
+          end,
+          'snippet_forward',
+          'fallback'
+        },
+        ['<CR>'] = { 'select_and_accept', 'fallback' },
+      },
+
+      appearance = {
+        nerd_font_variant = 'mono'
+      },
+
+      -- fuzzy = {
+      --   sorts = {
+      --     'sort_text',
+      --     'kind',
+      --     'exact',
+      --     'score',
+      --   }
+      -- },
+
+      completion = {
+        documentation = {
+          auto_show = true,
+          auto_show_delay_ms = 500
+        },
+
+        accept = { auto_brackets = { enabled = false }, },
+      },
+
+      signature = {
+        enabled = true
+      }
+    },
+    opts_extend = { "sources.default" },
+    config = function(_, opts)
+      local blink = require('blink.cmp')
+      local capabilities = {
+        textDocument = {
+          foldingRange = {
+            dynamicRegistration = false,
+            lineFoldingOnly = true
+          }
+        }
+      }
+
+      capabilities = blink.get_lsp_capabilities(capabilities)
+      vim.lsp.config('*', {
+        capabilities = capabilities
+      })
+
+      -- hide copilot suggestion on cmp
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'BlinkCmpMenuOpen',
+        callback = function()
+          require("copilot.suggestion").dismiss()
+          vim.b.copilot_suggestion_hidden = true
+        end,
+      })
+
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'BlinkCmpMenuClose',
+        callback = function()
+          vim.b.copilot_suggestion_hidden = false
+        end,
+      })
+      blink.setup(opts)
+    end
+  },
+  {
+    "rachartier/tiny-glimmer.nvim",
+    event = "VeryLazy",
+    priority = 10, -- Low priority to catch other plugins' keybindings
+    config = function()
+      require("tiny-glimmer").setup({
+        overwrite = {
+          yank = {
+            default_animation = "fade"
+          },
+          undo = {
+            enabled = true,
+            settings = {
+              max_duration = 1000,
+              min_duration = 1000
+            }
+          },
+          redo = {
+            enabled = true,
+            settings = {
+              max_duration = 1000,
+              min_duration = 1000
+            }
+          }
+        },
+        -- presets = {
+        --   pulsar = {
+        --     enabled = true
+        --   }
+        -- },
+        animations = {
+          fade = {
+            max_duration = 800, -- Maximum animation duration in ms
+            min_duration = 600,
+          },
+          reverse_fade = {
+            max_duration = 760,
+            min_duration = 600,
+          }
+        }
+      })
+    end,
+  },
+  {
+    "LuxVim/nvim-luxmotion",
+    config = function()
+      require("luxmotion").setup()
+    end,
   }
 })
 
@@ -576,23 +458,7 @@ require("lazy").setup({
 require("mappings")
 
 -- override
-vim.cmd [[colorscheme catppuccin-mocha]]
-vim.cmd [[highlight WinSeparator guifg=darkgray1]]
+-- vim.cmd [[colorscheme catppuccin-macchiato]]
+vim.cmd [[highlight WinSeparator guifg=DarkGray]]
 
 vim.cmd [[autocmd VimEnter * silent! !prettierd restart]]
-
--- hide copilot suggestion on cmp
-vim.api.nvim_create_autocmd('User', {
-  pattern = 'BlinkCmpMenuOpen',
-  callback = function()
-    require("copilot.suggestion").dismiss()
-    vim.b.copilot_suggestion_hidden = true
-  end,
-})
-
-vim.api.nvim_create_autocmd('User', {
-  pattern = 'BlinkCmpMenuClose',
-  callback = function()
-    vim.b.copilot_suggestion_hidden = false
-  end,
-})
