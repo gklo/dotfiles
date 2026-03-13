@@ -112,17 +112,25 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
   -- color schemes
-  { "catppuccin/nvim",         name = "catppuccin", priority = 1000 },
+  {
+    "catppuccin/nvim",
+    name = "catppuccin",
+    priority = 1000,
+    config = function()
+      require("catppuccin").setup({
+        transparent_background = true,
+      })
+      vim.cmd.colorscheme("catppuccin-frappe")
+    end
+  },
   {
     'sainnhe/gruvbox-material',
     lazy = false,
     priority = 1000,
     config = function()
-      -- Optionally configure and load the colorscheme
-      -- directly inside the plugin declaration.
       vim.g.gruvbox_material_enable_italic = true
       vim.g.gruvbox_material_transparent_background = 1
-      vim.cmd.colorscheme('gruvbox-material')
+      -- vim.cmd.colorscheme('gruvbox-material')
     end
   },
   -- plugins
@@ -190,6 +198,8 @@ require("lazy").setup({
     "rmagatti/auto-session",
     dependencies = { "nvim-tree/nvim-tree.lua" },
     config = function()
+      vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
+
       local api = require("nvim-tree.api")
       local function close_nvim_tree()
         api.tree.close()
@@ -209,12 +219,9 @@ require("lazy").setup({
       vim.g.suda_smart_edit = true
     end
   }, -- Lua
-  {  -- keep cursor in place after > or =
-    "gbprod/stay-in-place.nvim",
-    opts = {}
-  },
   {
     "pmizio/typescript-tools.nvim",
+    enabled = false,
     dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
     opts = {},
   },
@@ -241,7 +248,23 @@ require("lazy").setup({
       explorer = { enabled = true },
       rename = { enabled = true },
       -- indent = { enabled = true },
-      picker = { enabled = true },
+      picker = {
+        enabled = true,
+        sources = {
+          grep = {
+            exclude = {
+              "**/pnpm-lock.yaml", -- covers pnpm-lock.yaml
+              "**/node_modules/**",
+              "**/.git/**",
+              -- add any other patterns you want, e.g.:
+              "**/dist/**",
+              "**/build/**",
+              "**/.yarn/**",
+              "**/.pnpm-store/**",
+            },
+          }
+        }
+      },
       quickfile = { enabled = true },
       scope = { enabled = true },
       statuscolumn = { enabled = true },
@@ -278,10 +301,10 @@ require("lazy").setup({
     },
   },
   -- proper tag selection for jsx
-  { 'nvim-mini/mini.ai',       version = '*',       opts = {} },
-  { 'nvim-mini/mini.surround', version = '*',       opts = {} },
+  { 'nvim-mini/mini.ai',       version = '*', opts = {} },
+  { 'nvim-mini/mini.surround', version = '*', opts = {} },
   -- { 'nvim-mini/mini.pairs',    version = '*',       opts = {} },
-  { 'nvim-mini/mini.icons',    version = '*',       opts = {} },
+  { 'nvim-mini/mini.icons',    version = '*', opts = {} },
   {
     'saghen/blink.pairs',
     version = '*', -- (recommended) only required with prebuilt binaries
@@ -345,15 +368,6 @@ require("lazy").setup({
       appearance = {
         nerd_font_variant = 'mono'
       },
-
-      -- fuzzy = {
-      --   sorts = {
-      --     'sort_text',
-      --     'kind',
-      --     'exact',
-      --     'score',
-      --   }
-      -- },
 
       completion = {
         documentation = {
@@ -428,11 +442,7 @@ require("lazy").setup({
             }
           }
         },
-        -- presets = {
-        --   pulsar = {
-        --     enabled = true
-        --   }
-        -- },
+
         animations = {
           fade = {
             max_duration = 800, -- Maximum animation duration in ms
@@ -447,11 +457,15 @@ require("lazy").setup({
     end,
   },
   {
-    "LuxVim/nvim-luxmotion",
+    "josstei/whisk.nvim",
+    event = "VeryLazy",
     config = function()
-      require("luxmotion").setup()
+      require("whisk").setup()
     end,
-  }
+  },
+  {
+    'neoclide/vim-jsx-improve',
+  },
 })
 
 -- commands
