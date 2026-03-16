@@ -1,0 +1,15 @@
+# set up Zsh completions with plugins
+mattmc3/ez-compinit
+
+# completions
+Aloxaf/fzf-tab
+
+#prompts
+sindresorhus/pure kind:fpath
+
+# popular fish-like plugins
+mattmc3/zfunctions
+zsh-users/zsh-autosuggestions
+zdharma-continuum/fast-syntax-highlighting kind:defer
+zsh-users/zsh-history-substring-search
+
