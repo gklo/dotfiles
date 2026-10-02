@@ -1,4 +1,4 @@
--- Global settings
+-- Global mettings
 vim.g.mapleader = " "
 
 -- Backup and file handling
@@ -34,6 +34,7 @@ vim.o.wrap = true
 vim.o.ignorecase = true
 vim.o.smartcase = true
 vim.o.infercase = true
+
 vim.o.incsearch = false
 vim.o.wildignorecase = true
 vim.o.wildmode = "longest:full,full"
@@ -64,6 +65,29 @@ vim.cmd("au CursorHold * checktime")
 vim.cmd("autocmd TermOpen * setlocal nonumber norelativenumber")
 
 vim.cmd("autocmd BufNewFile,BufRead *.js set filetype=javascriptreact")
+
+-- Share registers (and other ShaDa data) between Neovim instances
+vim.api.nvim_create_autocmd({ "TextYankPost", "CursorHold", "FocusGained", "FocusLost" }, {
+  group = vim.api.nvim_create_augroup("ShadaSync", { clear = true }),
+  callback = function()
+    if vim.fn.exists(":wshada") == 2 then
+      pcall(vim.cmd, "wshada")
+      pcall(vim.cmd, "rshada")
+    end
+  end,
+})
+
+-- smarter dd, if the line is empty, delete to black hole, otherwise delete normally, respect count
+vim.keymap.set('n', 'dd', function()
+  local line = vim.api.nvim_get_current_line()
+  if line:match('^%s*$') then
+    -- Delete to black hole, respect count
+    local count = vim.v.count1
+    vim.cmd('normal! ' .. count .. '"_dd')
+  else
+    vim.cmd('normal! ' .. vim.v.count1 .. 'dd')
+  end
+end)
 
 -- config lsp diagnostic
 vim.diagnostic.config({
@@ -113,25 +137,25 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
   -- color schemes
   {
-    "catppuccin/nvim",
-    name = "catppuccin",
-    priority = 1000,
-    config = function()
-      require("catppuccin").setup({
-        transparent_background = true,
-      })
-      vim.cmd.colorscheme("catppuccin-frappe")
-    end
-  },
-  {
-    'sainnhe/gruvbox-material',
+    "neanias/everforest-nvim",
+    version = false,
     lazy = false,
-    priority = 1000,
+    priority = 1000, -- make sure to load this before all the other start plugins
+    -- Optional; default configuration will be used if setup isn't called.
     config = function()
-      vim.g.gruvbox_material_enable_italic = true
-      vim.g.gruvbox_material_transparent_background = 1
-      -- vim.cmd.colorscheme('gruvbox-material')
-    end
+      require("everforest").setup({
+        -- Enable or disable italics for comments, functions, etc.
+        italics = true,
+
+        -- Optional: If you want to disable italics specifically for comments
+        disable_italic_comments = false,
+
+        -- Other configurations...
+        background = "medium",
+        transparent_background_level = 0,
+      })
+      vim.cmd("colorscheme everforest")
+    end,
   },
   -- plugins
   "tpope/vim-repeat",
@@ -147,31 +171,32 @@ require("lazy").setup({
   -- treesitter
   {
     "nvim-treesitter/nvim-treesitter",
-    branch = 'master',
     lazy = false,
     build = ":TSUpdate",
-    config = function()
-      require 'nvim-treesitter.configs'.setup {
-        auto_install = true,
-        incremental_selection = {
-          enable = true,
-          keymaps = {
-            node_incremental = "v",
-            node_decremental = "V",
-          },
+    opts = {}
+  },
+  {
+    'MeanderingProgrammer/treesitter-modules.nvim',
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    ---@module 'treesitter-modules'
+    ---@type ts.mod.UserConfig
+    opts = {
+      auto_install = true,
+      incremental_selection = {
+        enable = true,
+        keymaps = {
+          node_incremental = "v",
+          node_decremental = "V",
         },
-      }
-    end
+      },
+
+    },
   },
   -- lsp
   {
     "mason-org/mason-lspconfig.nvim",
     opts = {
-      automatic_enable = {
-        exclude = {
-          "ts_ls"
-        }
-      }
+      automatic_enable = true
     },
     dependencies = {
       { "mason-org/mason.nvim", opts = {} },
@@ -182,17 +207,6 @@ require("lazy").setup({
   {
     "NMAC427/guess-indent.nvim",
     opts = {}
-  },
-  {
-    "zbirenbaum/copilot.lua",
-    -- dependencies = {
-    --   "copilotlsp-nvim/copilot-lsp", -- (optional) for NES functionality
-    -- },
-    opts = {
-      suggestion = {
-        auto_trigger = true
-      },
-    }
   },
   {
     "rmagatti/auto-session",
@@ -220,12 +234,6 @@ require("lazy").setup({
     end
   }, -- Lua
   {
-    "pmizio/typescript-tools.nvim",
-    enabled = false,
-    dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
-    opts = {},
-  },
-  {
     "JoosepAlviste/nvim-ts-context-commentstring",
     config = function()
       require("ts_context_commentstring").setup()
@@ -250,6 +258,16 @@ require("lazy").setup({
       -- indent = { enabled = true },
       picker = {
         enabled = true,
+        layout = {
+          preset = "vertical"
+        },
+        layouts = {
+          vertical = {
+            layout = {
+              width = 0.8
+            }
+          }
+        },
         sources = {
           grep = {
             exclude = {
@@ -261,6 +279,7 @@ require("lazy").setup({
               "**/build/**",
               "**/.yarn/**",
               "**/.pnpm-store/**",
+              "**/*.gen.ts"
             },
           }
         }
@@ -301,12 +320,18 @@ require("lazy").setup({
     },
   },
   -- proper tag selection for jsx
-  { 'nvim-mini/mini.ai',       version = '*', opts = {} },
-  { 'nvim-mini/mini.surround', version = '*', opts = {} },
-  -- { 'nvim-mini/mini.pairs',    version = '*',       opts = {} },
-  { 'nvim-mini/mini.icons',    version = '*', opts = {} },
+  { 'nvim-mini/mini.ai',    version = '*', opts = {} },
+  { 'nvim-mini/mini.icons', version = '*', opts = {} },
+  {
+    'nvim-lualine/lualine.nvim',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    opts = {
+      theme = "everforest"
+    }
+  },
   {
     'saghen/blink.pairs',
+    build = function() require('blink.pairs').build():pwait(60000) end,
     version = '*', -- (recommended) only required with prebuilt binaries
     dependencies = 'saghen/blink.download',
     --- @module 'blink.pairs'
@@ -338,7 +363,7 @@ require("lazy").setup({
   {
     'saghen/blink.cmp',
     dependencies = {
-      'zbirenbaum/copilot.lua',
+      -- 'zbirenbaum/copilot.lua',
       'onsails/lspkind.nvim'
     },
     version = '1.*',
@@ -347,21 +372,21 @@ require("lazy").setup({
     opts = {
       keymap = {
         preset = 'super-tab',
-        ['<Tab>'] = {
-          function(cmp)
-            local copilot = require('copilot.suggestion')
-
-            if cmp.snippet_active() then
-              return cmp.accept()
-            elseif copilot.is_visible() then
-              return copilot.accept()
-            else
-              return cmp.select_and_accept()
-            end
-          end,
-          'snippet_forward',
-          'fallback'
-        },
+        -- ['<Tab>'] = {
+        --   function(cmp)
+        --     local copilot = require('copilot.suggestion')
+        --
+        --     if cmp.snippet_active() then
+        --       return cmp.accept()
+        --     elseif copilot.is_visible() then
+        --       return copilot.accept()
+        --     else
+        --       return cmp.select_and_accept()
+        --     end
+        --   end,
+        --   'snippet_forward',
+        --   'fallback'
+        -- },
         ['<CR>'] = { 'select_and_accept', 'fallback' },
       },
 
@@ -400,20 +425,20 @@ require("lazy").setup({
       })
 
       -- hide copilot suggestion on cmp
-      vim.api.nvim_create_autocmd('User', {
-        pattern = 'BlinkCmpMenuOpen',
-        callback = function()
-          require("copilot.suggestion").dismiss()
-          vim.b.copilot_suggestion_hidden = true
-        end,
-      })
-
-      vim.api.nvim_create_autocmd('User', {
-        pattern = 'BlinkCmpMenuClose',
-        callback = function()
-          vim.b.copilot_suggestion_hidden = false
-        end,
-      })
+      -- vim.api.nvim_create_autocmd('User', {
+      --   pattern = 'BlinkCmpMenuOpen',
+      --   callback = function()
+      --     require("copilot.suggestion").dismiss()
+      --     vim.b.copilot_suggestion_hidden = true
+      --   end,
+      -- })
+      --
+      -- vim.api.nvim_create_autocmd('User', {
+      --   pattern = 'BlinkCmpMenuClose',
+      --   callback = function()
+      --     vim.b.copilot_suggestion_hidden = false
+      --   end,
+      -- })
       blink.setup(opts)
     end
   },
@@ -466,6 +491,48 @@ require("lazy").setup({
   {
     'neoclide/vim-jsx-improve',
   },
+  {
+    "kylechui/nvim-surround",
+    version = "^4.0.0", -- Use for stability; omit to use `main` branch for the latest features
+    event = "VeryLazy",
+    config = function()
+      -- disabled all default mappings
+      vim.g.nvim_surround_no_mappings = true
+      -- See `:h nvim-surround.keymaps`
+      vim.keymap.set("n", "sa", "<Plug>(nvim-surround-normal)", {
+        desc = "Add a surrounding pair around a motion (normal mode)",
+      })
+      vim.keymap.set("n", "sd", "<Plug>(nvim-surround-delete)", {
+        desc = "Delete a surrounding pair",
+      })
+      vim.keymap.set("n", "sr", "<Plug>(nvim-surround-change)", {
+        desc = "Change a surrounding pair",
+      })
+      vim.keymap.set("x", "sa", "<Plug>(nvim-surround-visual)", { desc = "Add surrounding to selection" })
+
+      require("nvim-surround").setup()
+    end
+  },
+  {
+    'dmtrKovalenko/fff.nvim',
+    build = function()
+      -- downloads a prebuilt binary or falls back to cargo build
+      require("fff.download").download_or_build_binary()
+    end,
+    -- for nixos:
+    -- build = "nix run .#release",
+    opts = {
+      layout = {
+        prompt_position = "top",
+        preview_position = "bottom"
+      }
+    },
+    lazy = false, -- the plugin lazy-initialises itself
+    keys = {
+      { "<space>f", function() require('fff').find_files() end, desc = 'FFFind files' },
+      { "<space>/", function() require('fff').live_grep() end,  desc = 'LiFFFe grep' },
+    },
+  }
 })
 
 -- commands
@@ -475,4 +542,55 @@ require("mappings")
 -- vim.cmd [[colorscheme catppuccin-macchiato]]
 vim.cmd [[highlight WinSeparator guifg=DarkGray]]
 
-vim.cmd [[autocmd VimEnter * silent! !prettierd restart]]
+local function set_diagnostic_italic()
+  local groups = {
+    "DiagnosticError",
+    "DiagnosticWarn",
+    "DiagnosticInfo",
+    "DiagnosticHint",
+    "DiagnosticOk",
+    "DiagnosticVirtualTextError",
+    "DiagnosticVirtualTextWarn",
+    "DiagnosticVirtualTextInfo",
+    "DiagnosticVirtualTextHint",
+    "DiagnosticVirtualTextOk",
+    "DiagnosticFloatingError",
+    "DiagnosticFloatingWarn",
+    "DiagnosticFloatingInfo",
+    "DiagnosticFloatingHint",
+    "DiagnosticFloatingOk",
+  }
+
+  for _, group in ipairs(groups) do
+    -- Get the resolved highlight (follows links)
+    local hl = vim.api.nvim_get_hl(0, { name = group, link = false })
+
+    if hl and (hl.fg or hl.bg or hl.sp) then
+      -- Keep existing colors, force italic
+      vim.api.nvim_set_hl(0, group, {
+        fg = hl.fg,
+        bg = hl.bg,
+        sp = hl.sp,
+        italic = true,
+        bold = hl.bold,
+        underline = hl.underline,
+        undercurl = hl.undercurl,
+        strikethrough = hl.strikethrough,
+      })
+    else
+      -- Fallback: just add italic if no color info
+      vim.api.nvim_set_hl(0, group, { italic = true, default = true })
+    end
+  end
+end
+
+-- Run after colorscheme
+vim.api.nvim_create_autocmd("ColorScheme", {
+  callback = function()
+    -- small delay so the colorscheme finishes setting highlights
+    vim.defer_fn(set_diagnostic_italic, 10)
+  end,
+})
+
+-- Apply now
+set_diagnostic_italic()
